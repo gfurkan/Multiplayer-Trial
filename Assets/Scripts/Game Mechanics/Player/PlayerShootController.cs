@@ -7,7 +7,11 @@ namespace Player.Shoot
     {
         #region Fields
 
+        [SerializeField] private GameObject bulletImpactPrefab;
+        [SerializeField] private float shootingDelay = 0;
+        
         private Camera cam;
+        private float time = 0;
 
         #endregion
         
@@ -21,13 +25,25 @@ namespace Player.Shoot
         void Start()
         {
             cam = Camera.main;
+            time = shootingDelay;
         }
         
         void Update()
         {
-            if (Input.GetButtonDown("Fire1"))
+            if (Input.GetButton("Fire1"))
+            { 
+                time += Time.deltaTime;
+                
+                if (time > shootingDelay)
+                { 
+                    Shoot(); 
+                    time = 0;
+                }
+            }
+
+            if (Input.GetButtonUp("Fire1"))
             {
-                Shoot();
+                time = shootingDelay;
             }
         }
 
@@ -46,7 +62,7 @@ namespace Player.Shoot
             RaycastHit raycastHit;
             if (Physics.Raycast(CalculateShootingDirection(), out raycastHit,100))
             {
-                print("hit");
+                CreateImpact(raycastHit.point,raycastHit.normal);
             }
         }
         private Ray CalculateShootingDirection()
@@ -56,6 +72,11 @@ namespace Player.Shoot
             return ray;
         }
 
+        private void CreateImpact(Vector3 hitPosition,Vector3 hitNormal)
+        {
+            var bulletImpact=Instantiate(bulletImpactPrefab, hitPosition+(hitNormal*0.002f), Quaternion.LookRotation(hitNormal, Vector3.up));
+            Destroy(bulletImpact,2);
+        }
         #endregion
 
         #region Public Methods
