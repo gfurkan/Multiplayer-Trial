@@ -91,6 +91,7 @@ namespace Player.Shoot
 
                 ChangeGun(gunIndex);
             }
+            ChangeGunWithNumberKeys();
         }
 
         private void OnDrawGizmos()
@@ -153,6 +154,34 @@ namespace Player.Shoot
                 {
                     activeGun.muzzleFlash.SetActive(false);
                     muzzleCounter = tempValue;
+                }
+            }
+        }
+
+        void ChangeGunWithNumberKeys()
+        {
+            if (Input.GetKeyDown("1"))
+            {
+                if (gunIndex != 0)
+                {
+                    ChangeGun(0);
+                    gunIndex = 0;
+                }
+            }
+            if (Input.GetKeyDown("2"))
+            {
+                if (gunIndex != 1)
+                {
+                    ChangeGun(1);
+                    gunIndex = 1;
+                }
+            }
+            if (Input.GetKeyDown("3"))
+            {
+                if (gunIndex != 2)
+                {
+                    ChangeGun(2);
+                    gunIndex = 2;
                 }
             }
         }

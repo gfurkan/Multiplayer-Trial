@@ -1,5 +1,8 @@
+using Managers.Spawn;
 using TMPro;
 using UnityEngine;
+using System.Runtime.InteropServices;
+
 
 namespace Player.Movement
 {
@@ -17,6 +20,9 @@ namespace Player.Movement
         [SerializeField] private float rotationSensitivity = 0;
         [SerializeField] private bool invertMouseLook = false;
         [SerializeField] private Transform viewPoint;
+        
+        [DllImport("user32.dll")]
+        static extern bool SetCursorPos(int X, int Y);
         
         private Vector3 movementDirection,movementVector;
         private Vector2 mouseInput;
@@ -38,6 +44,8 @@ namespace Player.Movement
 
         void Start()
         {
+            SpawnPlayer();
+            SetCursorPos(Screen.width/2,Screen.height);
             movementSpeed = walkSpeed;
             Cursor.lockState = CursorLockMode.Locked;
             characterController = GetComponent<CharacterController>();
@@ -123,7 +131,14 @@ namespace Player.Movement
         {
             movementDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         }
-        
+
+        void SpawnPlayer()
+        {
+            Transform spawnTransform = SpawnManager.Instance.GetRandomSpawnPosition();
+            
+            transform.position = spawnTransform.position;
+            transform.rotation = spawnTransform.rotation;
+        }
         #endregion
 
         #region Public Methods
