@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Multiplayer.Room.Info;
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
@@ -11,10 +13,13 @@ namespace Multiplayer.Launcher
 
         public static Launcher Instance = null;
 
-        [SerializeField] private GameObject menuButtons,loadingPanel,createRoomPanel,roomPanel,errorPanel;
+        [SerializeField] private GameObject menuButtons,loadingPanel,createRoomPanel,roomPanel,errorPanel,browsePanel;
         [SerializeField] private TextMeshProUGUI loadingText,roomNameText,errorText;
         [SerializeField] private TMP_InputField roomNameInput;
+        [SerializeField] private RoomInfoController roomInfoController;
+        [SerializeField] private int roomNameCharacterLimit = 0;
         
+        private List<RoomInfoController> roomInfoList = new List<RoomInfoController>();
         #endregion
         
         #region Properties
@@ -33,6 +38,7 @@ namespace Multiplayer.Launcher
         {
              CloseMenu();
              ConnectToNetwork();
+             roomNameInput.characterLimit = roomNameCharacterLimit;
         }
 
         #endregion
@@ -45,6 +51,7 @@ namespace Multiplayer.Launcher
             menuButtons.SetActive(false);
             createRoomPanel.SetActive(false);
             roomPanel.SetActive(false);
+            browsePanel.SetActive(false);
         }
 
         void ConnectToNetwork()
@@ -123,6 +130,56 @@ namespace Multiplayer.Launcher
         {
             CloseMenu();
             menuButtons.SetActive(true);
+        }
+
+        public void OpenRoomBrowser()
+        {
+            CloseMenu();
+            browsePanel.SetActive(true);
+
+        }
+
+        public void CloseRoomBrowser()
+        {
+            CloseMenu();
+            menuButtons.SetActive(true);
+        }
+
+        public override void OnRoomListUpdate(List<RoomInfo> roomList)
+        {
+            foreach (RoomInfoController roomInfo in roomInfoList)
+            {
+                Destroy(roomInfo.gameObject);
+            }
+            
+            roomInfoList.Clear();
+            roomInfoController.gameObject.SetActive(false);
+            
+            for (int i = 0; i < roomList.Count; i++)
+            {
+                if (roomList[i].PlayerCount!=roomList[i].MaxPlayers && !roomList[i].RemovedFromList)
+                {
+                    RoomInfoController newButton = Instantiate(roomInfoController, roomInfoController.transform.parent);
+                    newButton.SetRoomInfo(roomList[i]);
+                    newButton.gameObject.SetActive(true);
+                    roomInfoList.Add(newButton);
+                    
+                }
+            }
+        }
+
+        public void JoinRoom(RoomInfo roomInfo)
+        {
+            PhotonNetwork.JoinRoom(roomInfo.Name);
+            
+            CloseMenu();
+            loadingText.text = "Joining Room...";
+            loadingPanel.SetActive(true);
+        }
+
+        public void QuitGame()
+        {
+            Application.Quit();
         }
         #endregion
     }
