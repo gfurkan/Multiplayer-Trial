@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using Photon.Realtime;
+using Random = UnityEngine.Random;
 
 namespace Multiplayer.Launcher
 {
@@ -13,13 +14,18 @@ namespace Multiplayer.Launcher
 
         public static Launcher Instance = null;
 
-        [SerializeField] private GameObject menuButtons,loadingPanel,createRoomPanel,roomPanel,errorPanel,browsePanel;
+        [SerializeField] private GameObject menuButtons,loadingPanel,createRoomPanel,roomPanel,errorPanel,browsePanel,nicknamePanel;
         [SerializeField] private TextMeshProUGUI loadingText,roomNameText,errorText;
-        [SerializeField] private TMP_InputField roomNameInput;
+        [SerializeField] private TMP_InputField roomNameInput,nicknameInput;
+        [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private RoomInfoController roomInfoController;
         [SerializeField] private int roomNameCharacterLimit = 0;
+        [SerializeField] private byte maxPlayerCount = 0;
         
         private List<RoomInfoController> roomInfoList = new List<RoomInfoController>();
+        private List<TextMeshProUGUI> playerNameList = new List<TextMeshProUGUI>();
+
+        private bool isNicknameSetted = false;
         #endregion
         
         #region Properties
@@ -52,6 +58,7 @@ namespace Multiplayer.Launcher
             createRoomPanel.SetActive(false);
             roomPanel.SetActive(false);
             browsePanel.SetActive(false);
+            nicknamePanel.SetActive(false);
         }
 
         void ConnectToNetwork()
@@ -60,6 +67,27 @@ namespace Multiplayer.Launcher
             loadingText.text = "Connecting to network...";
 
             PhotonNetwork.ConnectUsingSettings();
+        }
+
+        void ListAllPlayers()
+        {
+            foreach (var player in playerNameList)
+            {
+                Destroy(player.gameObject);
+            }
+
+            Photon.Realtime.Player[] players = PhotonNetwork.PlayerList;
+            
+            playerNameList.Clear();
+            playerNameText.gameObject.SetActive(false);
+
+            for (int i = 0; i < players.Length; i++)
+            {
+                var text = Instantiate(playerNameText, playerNameText.transform.parent);
+                text.text = players[i].NickName;
+                playerNameList.Add(text);
+                text.gameObject.SetActive(true);
+            }
         }
         #endregion
 
@@ -75,6 +103,21 @@ namespace Multiplayer.Launcher
         {  
             CloseMenu();
             menuButtons.SetActive(true);
+
+            if (!isNicknameSetted)
+            {
+                CloseMenu();
+                nicknamePanel.SetActive(true);
+                
+                if (PlayerPrefs.HasKey("nickname"))
+                {
+                    nicknameInput.text = PlayerPrefs.GetString("nickname");
+                }
+            }
+            else
+            {
+                PhotonNetwork.NickName = PlayerPrefs.GetString("nickname");
+            }
         }
 
         public void OpenRoomCreatePanel()
@@ -89,20 +132,26 @@ namespace Multiplayer.Launcher
             {
                 CloseMenu();
                 RoomOptions options = new RoomOptions();
-                options.MaxPlayers = 8;
+                options.MaxPlayers = maxPlayerCount;
 
                 PhotonNetwork.CreateRoom(roomNameInput.text, options);
                 loadingText.text = "Creating Room...";
                 loadingPanel.SetActive(true);
             }
         }
-
+        
+        public void CloseRoomCreate()
+        {
+            CloseMenu();
+            menuButtons.SetActive(true);
+        }
         public override void OnJoinedRoom()
         {
             CloseMenu();
 
             roomNameText.text = PhotonNetwork.CurrentRoom.Name;
             roomPanel.SetActive(true);
+            ListAllPlayers();
         }
 
         public void LeaveRoom()
@@ -157,7 +206,7 @@ namespace Multiplayer.Launcher
             
             for (int i = 0; i < roomList.Count; i++)
             {
-                if (roomList[i].PlayerCount!=roomList[i].MaxPlayers && !roomList[i].RemovedFromList)
+                if (!roomList[i].RemovedFromList)
                 {
                     RoomInfoController newButton = Instantiate(roomInfoController, roomInfoController.transform.parent);
                     newButton.SetRoomInfo(roomList[i]);
@@ -179,6 +228,32 @@ namespace Multiplayer.Launcher
         public void QuitGame()
         {
             Application.Quit();
+        }
+
+        public override void OnPlayerEnteredRoom(Photon.Realtime.Player newPlayer)
+        {
+            var text = Instantiate(playerNameText, playerNameText.transform.parent);
+            text.text = newPlayer.NickName;
+            playerNameList.Add(text);
+            text.gameObject.SetActive(true);
+        }
+
+        public override void OnPlayerLeftRoom(Photon.Realtime.Player otherPlayer)
+        {
+            ListAllPlayers();
+        }
+
+        public void SetNickname()
+        {
+            if (!string.IsNullOrEmpty(nicknameInput.text))
+            {
+                PhotonNetwork.NickName = nicknameInput.text;
+                isNicknameSetted = true;
+                
+                PlayerPrefs.SetString("nickname",nicknameInput.text);
+                CloseMenu();
+                menuButtons.SetActive(true);
+            }
         }
         #endregion
     }
