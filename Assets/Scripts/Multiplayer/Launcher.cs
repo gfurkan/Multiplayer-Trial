@@ -163,7 +163,6 @@ namespace Multiplayer.Launcher
                     newButton.SetRoomInfo(roomList[i]);
                     newButton.gameObject.SetActive(true);
                     roomInfoList.Add(newButton);
-                    
                 }
             }
         }
