@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using Photon.Realtime;
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 
 namespace Multiplayer.Launcher
@@ -15,12 +16,14 @@ namespace Multiplayer.Launcher
         public static Launcher Instance = null;
 
         [SerializeField] private GameObject menuButtons,loadingPanel,createRoomPanel,roomPanel,errorPanel,browsePanel,nicknamePanel;
-        [SerializeField] private TextMeshProUGUI loadingText,roomNameText,errorText;
+        [SerializeField] private TextMeshProUGUI loadingText, roomNameText, errorText;
         [SerializeField] private TMP_InputField roomNameInput,nicknameInput;
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private RoomInfoController roomInfoController;
         [SerializeField] private int roomNameCharacterLimit = 0;
         [SerializeField] private byte maxPlayerCount = 0;
+        [SerializeField] private string levelName;
+        [SerializeField] private GameObject startGameButton,testButton;
         
         private List<RoomInfoController> roomInfoList = new List<RoomInfoController>();
         private List<TextMeshProUGUI> playerNameList = new List<TextMeshProUGUI>();
@@ -45,6 +48,10 @@ namespace Multiplayer.Launcher
              CloseMenu();
              ConnectToNetwork();
              roomNameInput.characterLimit = roomNameCharacterLimit;
+
+#if UNITY_EDITOR
+            testButton.SetActive(true);
+#endif
         }
 
         #endregion
@@ -96,7 +103,9 @@ namespace Multiplayer.Launcher
         public override void OnConnectedToMaster()
         {
             loadingText.text = "Joining lobby...";
+            
             PhotonNetwork.JoinLobby();
+            PhotonNetwork.AutomaticallySyncScene = true;
         }
 
         public override void OnJoinedLobby()
@@ -152,6 +161,15 @@ namespace Multiplayer.Launcher
             roomNameText.text = PhotonNetwork.CurrentRoom.Name;
             roomPanel.SetActive(true);
             ListAllPlayers();
+
+            if (PhotonNetwork.IsMasterClient)
+            {
+                startGameButton.SetActive(true);
+            }
+            else
+            {
+                startGameButton.SetActive(false);
+            }
         }
 
         public void LeaveRoom()
@@ -254,6 +272,31 @@ namespace Multiplayer.Launcher
                 CloseMenu();
                 menuButtons.SetActive(true);
             }
+        }
+
+        public override void OnMasterClientSwitched(Photon.Realtime.Player newMasterClient)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                startGameButton.SetActive(true);
+            }
+            else
+            {
+                startGameButton.SetActive(false);
+            }
+        }
+
+        public void StartGame()
+        {
+            PhotonNetwork.LoadLevel(levelName);
+        }
+
+        public void QuickJoin()
+        {
+            PhotonNetwork.CreateRoom("test");
+            CloseMenu();
+            loadingText.text = "Creating Room";
+            loadingPanel.SetActive(true);
         }
         #endregion
     }
