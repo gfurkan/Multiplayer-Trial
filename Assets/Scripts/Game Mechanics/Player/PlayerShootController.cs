@@ -1,17 +1,18 @@
-using System;
 using Gun.Settings;
+using Photon.Pun;
+using Player.Health;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace Player.Shoot
 {
-    public class PlayerShootController: MonoBehaviour
+    public class PlayerShootController: MonoBehaviourPunCallbacks
     {
         #region Fields
 
         [SerializeField] private GameObject bulletImpactPrefab;
         [SerializeField] private float shootingDelay = 0,muzzleCounter=0;
         [SerializeField] private GunSettings[] guns;
+        [SerializeField] private GameObject playerImpact;
         
         private Camera cam;
         private float time = 0;
@@ -22,6 +23,8 @@ namespace Player.Shoot
         
         float tempValue = 0;
         private bool isAutoFireEnabled = false;
+        private PlayerHealthController healthController;
+        
         #endregion
         
         #region Properties
@@ -38,60 +41,65 @@ namespace Player.Shoot
             tempValue = muzzleCounter;
             
             ChangeGun(0);
+            healthController = GetComponent<PlayerHealthController>();
         }
         
         void Update()
         {
-            DisableMuzzleFlash();
-            
-            if (Input.GetButtonDown("Fire1"))
+            if (photonView.IsMine)
             {
-                if (!isAutoFireEnabled)
-                {
-                    Shoot(); 
-                }
-            }
+                DisableMuzzleFlash();
             
-            if (Input.GetButton("Fire1"))
-            {
-                if (isAutoFireEnabled)
+                if (Input.GetButtonDown("Fire1"))
                 {
-                    time += Time.deltaTime;
-                    if (time > shootingDelay)
-                    { 
+                    if (!isAutoFireEnabled)
+                    {
                         Shoot(); 
-                        time = 0;
                     }
                 }
-            }
-
-            if (Input.GetButtonUp("Fire1"))
-            {
-                time = shootingDelay;
-                activeGun.muzzleFlash.SetActive(false);
-            }
-
-            if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f)
-            {
-                gunIndex++;
-                if (gunIndex > guns.Length-1)
+            
+                if (Input.GetButton("Fire1"))
                 {
-                    gunIndex = 0;
+                    if (isAutoFireEnabled)
+                    {
+                        time += Time.deltaTime;
+                        if (time > shootingDelay)
+                        { 
+                            Shoot(); 
+                            time = 0;
+                        }
+                    }
                 }
 
-                ChangeGun(gunIndex);
-            }
-            else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f)
-            {
-                gunIndex--;
-                if (gunIndex <0)
+                if (Input.GetButtonUp("Fire1"))
                 {
-                    gunIndex = guns.Length-1;
+                    time = shootingDelay;
+                    activeGun.muzzleFlash.SetActive(false);
                 }
 
-                ChangeGun(gunIndex);
+                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f)
+                {
+                    gunIndex++;
+                    if (gunIndex > guns.Length-1)
+                    {
+                        gunIndex = 0;
+                    }
+
+                    ChangeGun(gunIndex);
+                }
+                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f)
+                {
+                    gunIndex--;
+                    if (gunIndex <0)
+                    {
+                        gunIndex = guns.Length-1;
+                    }
+
+                    ChangeGun(gunIndex);
+                }
+                ChangeGunWithNumberKeys();  
             }
-            ChangeGunWithNumberKeys();
+
         }
 
         private void OnDrawGizmos()
@@ -113,8 +121,17 @@ namespace Player.Shoot
 
             if (Physics.Raycast(CalculateShootingDirection(), out raycastHit,100))
             {
-                CreateImpact(raycastHit.point,raycastHit.normal);
-                activeGun.muzzleFlash.SetActive(true);
+                if (raycastHit.transform.CompareTag("Player"))
+                {
+                    PhotonNetwork.Instantiate(playerImpact.name, raycastHit.point, Quaternion.identity);
+                    raycastHit.collider.GetComponent<PhotonView>().RPC("DealDamage",RpcTarget.All,5,photonView.Owner.NickName);
+                }
+                else
+                {
+                    CreateImpact(raycastHit.point,raycastHit.normal);
+                    activeGun.muzzleFlash.SetActive(true);
+                }
+                
             }
         }
         private Ray CalculateShootingDirection()
@@ -184,6 +201,12 @@ namespace Player.Shoot
                     gunIndex = 2;
                 }
             }
+        }
+
+        [PunRPC]
+        void DealDamage(int damageValue,string name)
+        {
+            healthController.TakeDamage(damageValue);
         }
         #endregion
 

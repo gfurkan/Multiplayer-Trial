@@ -2,11 +2,13 @@ using Managers.Spawn;
 using TMPro;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using Cam.Movement;
+using Photon.Pun;
 
 
 namespace Player.Movement
 {
-    public class PlayerMovement: MonoBehaviour
+    public class PlayerMovement: MonoBehaviourPunCallbacks
     {
         #region Fields
 
@@ -31,7 +33,6 @@ namespace Player.Movement
         private float xRotation = 0;
 
         private bool isJumped = false;
-        
         private CharacterController characterController;
         #endregion
         
@@ -44,27 +45,32 @@ namespace Player.Movement
 
         void Start()
         {
-            SpawnPlayer();
-            SetCursorPos(Screen.width/2,Screen.height);
-            movementSpeed = walkSpeed;
-            Cursor.lockState = CursorLockMode.Locked;
-            characterController = GetComponent<CharacterController>();
+            if (photonView.IsMine)
+            {
+                Camera.main.GetComponent<CameraMovement>().GetViewPoint(viewPoint);
+                SetCursorPos(Screen.width/2,Screen.height);
+                movementSpeed = walkSpeed;
+                Cursor.lockState = CursorLockMode.Locked;
+                characterController = GetComponent<CharacterController>();
+            }
+
         }
         void Update()
         {
-             MovePlayer();
-             RotatePlayer();
+            if (photonView.IsMine)
+            {
+                MovePlayer();
+                RotatePlayer();
 
-             if (Input.GetKeyDown(KeyCode.LeftShift))
-             {
-                 movementSpeed = runSpeed;
-             }
-             else if (Input.GetKeyUp(KeyCode.LeftShift))
-             {
-                 movementSpeed = walkSpeed;
-             }
-
-             
+                if (Input.GetKeyDown(KeyCode.LeftShift))
+                {
+                    movementSpeed = runSpeed;
+                }
+                else if (Input.GetKeyUp(KeyCode.LeftShift))
+                {
+                    movementSpeed = walkSpeed;
+                }
+            }
         }
 
         #endregion
@@ -131,14 +137,7 @@ namespace Player.Movement
         {
             movementDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         }
-
-        void SpawnPlayer()
-        {
-            Transform spawnTransform = SpawnManager.Instance.GetRandomSpawnPosition();
-            
-            transform.position = spawnTransform.position;
-            transform.rotation = spawnTransform.rotation;
-        }
+        
         #endregion
 
         #region Public Methods

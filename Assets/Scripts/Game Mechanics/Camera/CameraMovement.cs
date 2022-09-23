@@ -1,21 +1,22 @@
+using Photon.Pun;
 using UnityEngine;
 
 namespace Cam.Movement
 {
-    public class CameraMovement: MonoBehaviour
+    public class CameraMovement: MonoBehaviourPunCallbacks
     {
         #region Fields
-        [SerializeField] private Transform followObject;
+       
         [SerializeField] private bool invertMouseLook = false;
-        
+
+        private Transform followObject;
         private float xRotation = 0;
         private Vector2 mouseInput;
-        private Vector3 distance;
-        
+
         #endregion
         
         #region Properties
-        
+
         
         #endregion
 
@@ -24,13 +25,17 @@ namespace Cam.Movement
         void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-            distance = transform.position - followObject.position;
+            
         }
         
         void LateUpdate()
         {
-            RotateCamera();
-            FollowObject();
+            if (followObject != null)
+            {
+                RotateCamera();
+                FollowObject();
+            }
+           
         }
 
         #endregion
@@ -39,7 +44,7 @@ namespace Cam.Movement
 
         void FollowObject()
         {
-            transform.position = followObject.position + distance;
+            transform.position = followObject.position;
         }
         
         void RotateCamera()
@@ -51,7 +56,10 @@ namespace Cam.Movement
 
         #region Public Methods
 
-        
+        public void GetViewPoint(Transform obj)
+        {
+            followObject = obj;
+        }
 
         #endregion
     }
