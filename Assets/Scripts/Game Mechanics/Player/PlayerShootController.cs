@@ -18,7 +18,8 @@ namespace Player.Shoot
         private Camera cam;
         private float time = 0;
         private float flashRotationY = 0;
-            
+
+        private int damageToDeal = 0;
         private int gunIndex = 0;
         private GunSettings activeGun;
         
@@ -125,7 +126,7 @@ namespace Player.Shoot
                 if (raycastHit.transform.CompareTag("Player"))
                 {
                     PhotonNetwork.Instantiate(playerImpact.name, raycastHit.point, Quaternion.identity);
-                    raycastHit.collider.GetComponent<PhotonView>().RPC("DealDamage",RpcTarget.All,5,photonView.Owner.NickName);
+                    raycastHit.collider.GetComponent<PhotonView>().RPC("DealDamage",RpcTarget.All,damageToDeal,photonView.Owner.NickName);
                 }
                 else
                 {
@@ -160,6 +161,7 @@ namespace Player.Shoot
             shootingDelay = activeGun.shootingDelay;
             isAutoFireEnabled = activeGun.isAutoFireEnabled;
             
+            SetDamageToDeal(activeGun);
             activeGun.gameObject.SetActive(true);
         }
 
@@ -209,6 +211,11 @@ namespace Player.Shoot
         void DealDamage(int damageValue,string name)
         {
             healthController.TakeDamage(damageValue,name);
+        }
+
+        private void SetDamageToDeal(GunSettings settings)
+        {
+            damageToDeal=settings.damageValue;
         }
         #endregion
 

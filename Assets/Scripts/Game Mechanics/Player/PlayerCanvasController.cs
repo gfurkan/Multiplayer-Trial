@@ -11,6 +11,7 @@ namespace Player.Canvas
         [SerializeField] private GameObject deathPanel;
         [SerializeField] private TextMeshProUGUI deathText;
         [SerializeField] private TextMeshProUGUI spawnTimeText;
+        [SerializeField] private TextMeshProUGUI healthText;
         
         #endregion
 
@@ -32,6 +33,11 @@ namespace Player.Canvas
             deathPanel.SetActive(false);
             deathText.text = "";
             spawnTimeText.text = "";
+        }
+
+        public void SetHealthText(int value)
+        {
+            healthText.text = value.ToString();
         }
         #endregion
     }

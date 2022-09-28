@@ -27,8 +27,14 @@ namespace Player.Health
 
         void Start()
         {
-            currentHealth = maxHealth;
-            spawner = GameObject.FindGameObjectWithTag("PlayerSpawner").GetComponent<PlayerSpawner>();
+            
+            if (photonView.IsMine)
+            {
+                currentHealth = maxHealth;
+                PlayerCanvasController.Instance.SetHealthText(currentHealth);
+                spawner = GameObject.FindGameObjectWithTag("PlayerSpawner").GetComponent<PlayerSpawner>();
+            }
+           
         }
 
 
@@ -67,10 +73,12 @@ namespace Player.Health
                 if (currentHealth > damageDealt)
                 {
                     currentHealth -= damageDealt;
+                    PlayerCanvasController.Instance.SetHealthText(currentHealth);
                 }
                 else
                 {
                     currentHealth = 0;
+                    PlayerCanvasController.Instance.SetHealthText(currentHealth);
                     KillPlayer(shooterName);
                 }
             }

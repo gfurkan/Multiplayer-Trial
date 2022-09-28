@@ -49,6 +49,7 @@ MonoBehaviour:
   _isAutoFireEnabled: 1
   _shootingDelay: 0.1
   _muzzleFlash: {fileID: 1230092101031372509}
+  _damageValue: 5
 --- !u!1 &2149136137719478854
 GameObject:
   m_ObjectHideFlags: 0
@@ -130,6 +131,7 @@ MonoBehaviour:
   _isAutoFireEnabled: 1
   _shootingDelay: 0.2
   _muzzleFlash: {fileID: 1230092102486140071}
+  _damageValue: 10
 --- !u!1 &2149136138074625645
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,6 +382,7 @@ MonoBehaviour:
   _isAutoFireEnabled: 0
   _shootingDelay: 0.4
   _muzzleFlash: {fileID: 1230092100947165306}
+  _damageValue: 20
 --- !u!1 &2149136138373344541
 GameObject:
   m_ObjectHideFlags: 0
