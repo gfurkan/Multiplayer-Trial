@@ -27,27 +27,20 @@ namespace Player.Spawn
                 SpawnPlayer();
             }
         }
-        
-        void Update()
-        {
-             
-        }
-
         #endregion
 
         #region Private Methods
-
-        void SpawnPlayer()
-        {
-            Transform spawnPosition = SpawnManager.Instance.GetRandomSpawnPosition();
-            currentPlayer=PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition.position, spawnPosition.rotation);
-        }
+        
 
         #endregion
 
         #region Public Methods
 
-        
+        public void SpawnPlayer()
+        {
+            Transform spawnPosition = SpawnManager.Instance.GetRandomSpawnPosition();
+            currentPlayer=PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition.position, spawnPosition.rotation);
+        }
 
         #endregion
     }

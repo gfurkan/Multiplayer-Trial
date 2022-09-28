@@ -273,6 +273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 100
+  deathParticle: {fileID: 7984169557797383981, guid: 5ed1bfe2132b9084895bb6d5850b8eb2, type: 3}
 --- !u!143 &2149136138074625643
 CharacterController:
   m_ObjectHideFlags: 0

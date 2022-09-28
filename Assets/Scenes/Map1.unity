@@ -933,7 +933,7 @@ GameObject:
   - component: {fileID: 394298472}
   m_Layer: 0
   m_Name: SpawnManager
-  m_TagString: Untagged
+  m_TagString: PlayerSpawner
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1938,7 +1938,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a46235cd27b43364788bd1edbd2778f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  followObject: {fileID: 0}
   invertMouseLook: 0
 --- !u!1 &965107477 stripped
 GameObject:

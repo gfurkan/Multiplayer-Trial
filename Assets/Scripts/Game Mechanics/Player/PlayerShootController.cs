@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Gun.Settings;
 using Photon.Pun;
 using Player.Health;
@@ -70,7 +71,7 @@ namespace Player.Shoot
                         }
                     }
                 }
-
+                
                 if (Input.GetButtonUp("Fire1"))
                 {
                     time = shootingDelay;
@@ -141,10 +142,11 @@ namespace Player.Shoot
             return ray;
         }
 
-        private void CreateImpact(Vector3 hitPosition,Vector3 hitNormal)
+        private async void CreateImpact(Vector3 hitPosition,Vector3 hitNormal)
         {
-            var bulletImpact=Instantiate(bulletImpactPrefab, hitPosition+(hitNormal*0.002f), Quaternion.LookRotation(hitNormal, Vector3.up));
-            Destroy(bulletImpact,2);
+            GameObject bulletImpact=PhotonNetwork.Instantiate(bulletImpactPrefab.name, hitPosition+(hitNormal*0.002f), Quaternion.LookRotation(hitNormal, Vector3.up));
+            await Task.Delay(2 * 1000);
+            PhotonNetwork.Destroy(bulletImpact);
         }
 
         void ChangeGun(int index)
