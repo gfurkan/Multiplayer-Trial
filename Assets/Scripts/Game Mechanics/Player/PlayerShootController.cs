@@ -208,7 +208,7 @@ namespace Player.Shoot
         [PunRPC]
         void DealDamage(int damageValue,string name)
         {
-            healthController.TakeDamage(damageValue);
+            healthController.TakeDamage(damageValue,name);
         }
         #endregion
 

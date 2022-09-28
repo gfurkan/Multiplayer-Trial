@@ -1,4 +1,6 @@
+using DG.Tweening;
 using Photon.Pun;
+using Player.Canvas;
 using Player.Spawn;
 using UnityEngine;
 
@@ -34,19 +36,31 @@ namespace Player.Health
 
         #region Private Methods
 
-        private void KillPlayer()
+        private void KillPlayer(string shooterName)
         {
             PhotonNetwork.Instantiate(deathParticle.name, transform.position, Quaternion.identity);
             PhotonNetwork.Destroy(gameObject);
             
+            PlayerCanvasController.Instance.OpenDeathPanel(shooterName);
+            ControlSpawningTime();
+        }
+
+        private void ControlSpawningTime()
+        {
+            DOVirtual.Int(5, 1, 5, v => PlayerCanvasController.Instance.SetSpawnTimeText(v)).OnComplete(SpawnPlayer);
+        }
+
+        private void SpawnPlayer()
+        {
             spawner.SpawnPlayer();
+            PlayerCanvasController.Instance.CloseDeathPanel();
         }
 
         #endregion
 
         #region Public Methods
 
-        public void TakeDamage(int damageDealt)
+        public void TakeDamage(int damageDealt,string shooterName)
         {
             if (photonView.IsMine)
             {
@@ -57,7 +71,7 @@ namespace Player.Health
                 else
                 {
                     currentHealth = 0;
-                    KillPlayer();
+                    KillPlayer(shooterName);
                 }
             }
         }
