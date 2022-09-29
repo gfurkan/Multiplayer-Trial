@@ -14,6 +14,7 @@ namespace Player.Shoot
         [SerializeField] private float shootingDelay = 0,muzzleCounter=0;
         [SerializeField] private GunSettings[] guns;
         [SerializeField] private GameObject playerImpact;
+        [SerializeField] private Transform gunHolderInHand, gunHolderInPlayer;
         
         private Camera cam;
         private float time = 0;
@@ -42,8 +43,9 @@ namespace Player.Shoot
             time = shootingDelay;
             tempValue = muzzleCounter;
             
-            ChangeGun(0);
+            photonView.RPC("SetGun",RpcTarget.All,gunIndex);
             healthController = GetComponent<PlayerHealthController>();
+            SetGunPosition();
         }
         
         void Update()
@@ -87,7 +89,7 @@ namespace Player.Shoot
                         gunIndex = 0;
                     }
 
-                    ChangeGun(gunIndex);
+                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
                 }
                 else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f)
                 {
@@ -97,7 +99,7 @@ namespace Player.Shoot
                         gunIndex = guns.Length-1;
                     }
 
-                    ChangeGun(gunIndex);
+                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
                 }
                 ChangeGunWithNumberKeys();  
             }
@@ -131,7 +133,7 @@ namespace Player.Shoot
                 else
                 {
                     CreateImpact(raycastHit.point,raycastHit.normal);
-                    activeGun.muzzleFlash.SetActive(true);
+                    photonView.RPC("ControlMuzzleFlash",RpcTarget.All,true);
                 }
                 
             }
@@ -165,6 +167,20 @@ namespace Player.Shoot
             activeGun.gameObject.SetActive(true);
         }
 
+        [PunRPC]
+        private void SetGun(int index)
+        {
+            if (index < guns.Length)
+            {
+                ChangeGun(index);
+            }
+        }
+
+        [PunRPC]
+        private void ControlMuzzleFlash(bool val)
+        {
+            activeGun.muzzleFlash.SetActive(val);
+        }
         void DisableMuzzleFlash()
         {
             if (activeGun.muzzleFlash.activeInHierarchy)
@@ -173,7 +189,7 @@ namespace Player.Shoot
                 
                 if (muzzleCounter <= 0)
                 {
-                    activeGun.muzzleFlash.SetActive(false);
+                    photonView.RPC("ControlMuzzleFlash",RpcTarget.All,false);
                     muzzleCounter = tempValue;
                 }
             }
@@ -185,24 +201,24 @@ namespace Player.Shoot
             {
                 if (gunIndex != 0)
                 {
-                    ChangeGun(0);
                     gunIndex = 0;
+                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
                 }
             }
             if (Input.GetKeyDown("2"))
             {
                 if (gunIndex != 1)
                 {
-                    ChangeGun(1);
                     gunIndex = 1;
+                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
                 }
             }
             if (Input.GetKeyDown("3"))
             {
                 if (gunIndex != 2)
                 {
-                    ChangeGun(2);
                     gunIndex = 2;
+                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
                 }
             }
         }
@@ -216,6 +232,16 @@ namespace Player.Shoot
         private void SetDamageToDeal(GunSettings settings)
         {
             damageToDeal=settings.damageValue;
+        }
+
+        private void SetGunPosition()
+        {
+            if (!photonView.IsMine)
+            {
+                gunHolderInPlayer.parent = gunHolderInHand;
+                gunHolderInPlayer.transform.localPosition = Vector3.zero;
+                gunHolderInPlayer.transform.localRotation=Quaternion.identity;
+            }
         }
         #endregion
 

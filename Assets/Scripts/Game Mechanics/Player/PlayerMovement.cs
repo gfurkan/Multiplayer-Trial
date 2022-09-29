@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 using Cam.Movement;
 using Photon.Pun;
+using Player.Animation;
 
 
 namespace Player.Movement
@@ -34,6 +35,8 @@ namespace Player.Movement
 
         private bool isJumped = false;
         private CharacterController characterController;
+        private PlayerAnimationController animationController;
+        
         #endregion
         
         #region Properties
@@ -49,9 +52,11 @@ namespace Player.Movement
             {
                 Camera.main.GetComponent<CameraMovement>().GetViewPoint(viewPoint);
                 SetCursorPos(Screen.width/2,Screen.height);
+                
                 movementSpeed = walkSpeed;
-                Cursor.lockState = CursorLockMode.Locked;
+
                 characterController = GetComponent<CharacterController>();
+                animationController = GetComponent<PlayerAnimationController>();
             }
 
         }
@@ -90,6 +95,7 @@ namespace Player.Movement
             {
                 movementVector.y = 0;
                 isJumped = false;
+                animationController.ControlPlayerGroundedn(true);
             }
             
             if (Input.GetButtonDown("Jump"))
@@ -97,12 +103,15 @@ namespace Player.Movement
                 if (!isJumped)
                 {
                     JumpPlayer();
-                    isJumped = true;
+                    isJumped = true; 
+                    animationController.ControlPlayerGroundedn(false);
                 }
             }
             
             movementVector.y += Physics.gravity.y * gravityMultiplier * Time.deltaTime;
             characterController.Move(movementVector * Time.deltaTime);
+
+            animationController.SetRunAnimation(movementVector.magnitude);
         }
         
         void RotatePlayer()
