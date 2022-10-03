@@ -38,15 +38,31 @@ namespace Multiplayer.Match
             {
                 SceneManager.LoadScene(0);
             }
+            else
+            {
+                NewPlayerSend(PhotonNetwork.NickName);
+            }
         }
         
         #endregion
 
         #region Private Methods
 
-        private void NewPlayerSend(object[] data)
+        private void NewPlayerSend(string username)
         {
-            
+            object[] package = new object[4];
+            package[0] = username;
+            package[1] = PhotonNetwork.LocalPlayer.ActorNumber;
+            package[2] = 0;
+            package[3] = 0;
+
+
+            PhotonNetwork.RaiseEvent(
+                (byte)EventCodes.NewPlayer,
+                package,
+                new RaiseEventOptions { Receivers = ReceiverGroup.MasterClient },
+                new SendOptions { Reliability = true }
+            );
         }
 
         private void NewPlayerReceive(object[] data)
@@ -84,23 +100,20 @@ namespace Multiplayer.Match
             {
                 EventCodes currentEvent = (EventCodes)photonEvent.Code;
                 object[] data = (object[])photonEvent.CustomData;
-
+                
                 switch (currentEvent)
                 {
                     case EventCodes.NewPlayer:
                         
                         NewPlayerReceive(data);
-                        
                         break;
                     case EventCodes.ListPlayers:
                         
                         ListPlayerReceive(data);
-                        
                         break;
                     case EventCodes.UpdateStat:
                         
                         UpdateStatsReceive(data);
-                        
                         break;
                 }
             }
