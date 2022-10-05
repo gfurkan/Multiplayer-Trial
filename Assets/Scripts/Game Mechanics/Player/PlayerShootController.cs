@@ -128,7 +128,7 @@ namespace Player.Shoot
                 if (raycastHit.transform.CompareTag("Player"))
                 {
                     PhotonNetwork.Instantiate(playerImpact.name, raycastHit.point, Quaternion.identity);
-                    raycastHit.collider.GetComponent<PhotonView>().RPC("DealDamage",RpcTarget.All,damageToDeal,photonView.Owner.NickName);
+                    raycastHit.collider.GetComponent<PhotonView>().RPC("DealDamage",RpcTarget.All,damageToDeal,photonView.Owner.NickName,PhotonNetwork.LocalPlayer.ActorNumber);
                 }
                 else
                 {
@@ -224,9 +224,9 @@ namespace Player.Shoot
         }
 
         [PunRPC]
-        void DealDamage(int damageValue,string name)
+        void DealDamage(int damageValue,string name,int actor)
         {
-            healthController.TakeDamage(damageValue,name);
+            healthController.TakeDamage(damageValue,name,actor);
         }
 
         private void SetDamageToDeal(GunSettings settings)

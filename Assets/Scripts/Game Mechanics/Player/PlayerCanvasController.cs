@@ -1,3 +1,4 @@
+using System;
 using Managers.Singleton;
 using TMPro;
 using UnityEngine;
@@ -12,9 +13,21 @@ namespace Player.Canvas
         [SerializeField] private TextMeshProUGUI deathText;
         [SerializeField] private TextMeshProUGUI spawnTimeText;
         [SerializeField] private TextMeshProUGUI healthText;
+        [SerializeField] private TextMeshProUGUI killsText;
+        [SerializeField] private TextMeshProUGUI deathsText;
         
         #endregion
 
+        #region Unity Methods
+
+        private void Start()
+        {
+            SetKillsText(0);
+            SetDeathsText(0);
+        }
+
+        #endregion
+        
         #region Public Methods
 
         public void OpenDeathPanel(string killerName)
@@ -38,6 +51,16 @@ namespace Player.Canvas
         public void SetHealthText(int value)
         {
             healthText.text = value.ToString();
+        }
+
+        public void SetKillsText(int value)
+        {
+            killsText.text = "KILLS " + value;
+        }
+        
+        public void SetDeathsText(int value)
+        {
+            deathsText.text = "DEATHS " + value;
         }
         #endregion
     }
