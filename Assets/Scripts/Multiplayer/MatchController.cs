@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 using Player.Canvas;
+using Player.LeaderBoard;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,7 @@ namespace Multiplayer.Match
 
         private static MatchController _Instance;
         private int minePlayerIndex = 0;
+        private List<PlayerLeaderBoardData> leaderBoardDatas = new List<PlayerLeaderBoardData>();
         
         #endregion
         
@@ -55,7 +57,22 @@ namespace Multiplayer.Match
                 NewPlayerSend(PhotonNetwork.NickName);
             }
         }
-        
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Tab))
+            {
+                ShowLeaderBoard();
+            }
+            if (Input.GetKeyUp(KeyCode.Tab))
+            {
+                if (PlayerCanvasController.Instance.leaderBoard.activeInHierarchy)
+                {
+                    PlayerCanvasController.Instance.leaderBoard.SetActive(false);
+                }
+            }
+        }
+
         #endregion
 
         #region Private Methods
@@ -181,6 +198,58 @@ namespace Multiplayer.Match
                 PlayerCanvasController.Instance.SetKillsText(0);
                 PlayerCanvasController.Instance.SetDeathsText(0);
             }
+        }
+
+        private void ShowLeaderBoard()
+        {
+            PlayerCanvasController.Instance.leaderBoard.SetActive(true);
+            foreach (PlayerLeaderBoardData data in leaderBoardDatas)
+            {
+                Destroy(data.gameObject);
+            }
+            leaderBoardDatas.Clear();
+            PlayerCanvasController.Instance.playerLeaderBoardData.gameObject.SetActive(false);
+
+            List<PlayerInfo> sortedList = SortPlayers(allPlayerInfos);
+            
+            foreach (PlayerInfo player in sortedList)
+            {
+                PlayerLeaderBoardData newData = Instantiate(PlayerCanvasController.Instance.playerLeaderBoardData,PlayerCanvasController.Instance.playerLeaderBoardData.transform.parent);
+                newData.SetDetails(player.name,player.kills,player.deaths);
+                newData.gameObject.SetActive(true);
+
+                leaderBoardDatas.Add(newData);
+            }
+
+        }
+
+        private List<PlayerInfo> SortPlayers(List<PlayerInfo> players)
+        {
+            List<PlayerInfo> sortedList = new List<PlayerInfo>();
+
+            while (sortedList.Count<players.Count)
+            {
+                int highest = -1;
+                PlayerInfo selectedPlayer = players[0];
+
+                foreach (PlayerInfo player in players)
+                {
+                    if (!sortedList.Contains(player))
+                    {
+                        int averageKills = player.kills - player.deaths;
+                        
+                        if (averageKills > highest)
+                        {
+                            selectedPlayer = player;
+                            highest = averageKills; 
+                        }
+                    }
+                }
+
+                sortedList.Add(selectedPlayer);
+            }
+
+            return sortedList;
         }
         #endregion
 

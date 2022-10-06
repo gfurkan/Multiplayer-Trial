@@ -1,5 +1,6 @@
 using System;
 using Managers.Singleton;
+using Player.LeaderBoard;
 using TMPro;
 using UnityEngine;
 
@@ -10,6 +11,10 @@ namespace Player.Canvas
         #region Fields
 
         [SerializeField] private GameObject deathPanel;
+        [SerializeField] private GameObject _leaderBoard;
+        
+        [SerializeField] private PlayerLeaderBoardData _playerLeaderBoardData;
+        
         [SerializeField] private TextMeshProUGUI deathText;
         [SerializeField] private TextMeshProUGUI spawnTimeText;
         [SerializeField] private TextMeshProUGUI healthText;
@@ -18,6 +23,13 @@ namespace Player.Canvas
         
         #endregion
 
+        #region Properties
+
+        public GameObject leaderBoard => _leaderBoard;
+        public PlayerLeaderBoardData playerLeaderBoardData => _playerLeaderBoardData;
+
+        #endregion
+        
         #region Unity Methods
 
         private void Start()

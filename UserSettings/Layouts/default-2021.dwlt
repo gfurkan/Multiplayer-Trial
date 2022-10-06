@@ -19,7 +19,7 @@ MonoBehaviour:
     width: 1920
     height: 997
   m_ShowMode: 4
-  m_Title: Game
+  m_Title: Hierarchy
   m_RootView: {fileID: 4}
   m_MinSize: {x: 875, y: 300}
   m_MaxSize: {x: 10000, y: 10000}
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 89
+  controlID: 29
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -172,7 +172,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 200}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 0
-  controlID: 77
+  controlID: 107
 --- !u!114 &8
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_MinSize: {x: 100, y: 200}
   m_MaxSize: {x: 8096, y: 16192}
   vertical: 1
-  controlID: 19
+  controlID: 51
 --- !u!114 &10
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -683,9 +683,9 @@ MonoBehaviour:
   m_PlayAudio: 0
   m_AudioPlay: 0
   m_Position:
-    m_Target: {x: 61.388775, y: 393.0228, z: -84.31149}
+    m_Target: {x: 445.99432, y: 275.74744, z: -198.96605}
     speed: 2
-    m_Value: {x: 61.388775, y: 393.0228, z: -84.31149}
+    m_Value: {x: 445.99432, y: 275.74744, z: -198.96605}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -732,13 +732,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.035390392, y: 0.0033124061, z: -0.0001178057, w: 0.9993919}
+    m_Target: {x: 0.060804125, y: -0.043093108, z: 0.0026267518, w: 0.9972366}
     speed: 2
-    m_Value: {x: 0.03538955, y: 0.0033123272, z: -0.00011780289, w: 0.9993681}
+    m_Value: {x: 0.06080285, y: -0.043092202, z: 0.0026266966, w: 0.9972157}
   m_Size:
-    m_Target: 23.978338
+    m_Target: 15.062844
     speed: 2
-    m_Value: 23.978338
+    m_Value: 15.062844
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -796,7 +796,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: e61cffff3a1dffff8021ffffae21ffff7a24ffffd627ffff722dffff4835ffff9c35ffffe239ffff103affffdc3cffff2a40ffff7856ffffa659ffff2c63ffffec9bffffee9bffffe4a5fffff6b4ffff4ab5ffff76b7ffff98b7ffff60baffff62c4fffffcd6ffff22eaffff80ecffffd4ecffff16f1ffff44f1ffff10f4ffff2cfbffff92ef000028fb0000380c010034190100
+      m_ExpandedIDs: eee5feffd0f2feff9e55fffff255ffff3a5affff685affff345dffff0c86ffffca92ffffd296ffffe69fffff80a6ffff56d2ffff0cf4ffffd8f6ffff2cfbffff325f0000bc6a0000987f0000608100001c930000bef6000086f80000
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -860,7 +860,8 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SkipHidden: 0
     m_SearchArea: 1
-    m_Folders: []
+    m_Folders:
+    - Assets/Scenes
     m_Globs: []
     m_OriginalText: 
   m_ViewMode: 0
@@ -874,7 +875,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 2a6d0000
     m_LastClickedID: 27946
-    m_ExpandedIDs: 00000000686300006a6300006c6300006e63000070630000726300007463000076630000786300007a6300007c6300007e63000080630000826300008463000086630000
+    m_ExpandedIDs: 00000000686300006a6300006c6300006e63000070630000726300007463000076630000786300007a6300007c6300007e6300008063000082630000846300008663000088630000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -899,21 +900,21 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_AssetTreeState:
-    scrollPos: {x: 0, y: 103}
+    scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: ffffffff00000000686300006a6300006c6300006e63000070630000726300007463000076630000786300007a6300007c6300007e63000080630000826300008463000086630000
+    m_ExpandedIDs: ffffffff00000000686300006a6300006c6300006e63000070630000726300007463000076630000786300007a6300007c6300007e630000806300008463000086630000306e0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
-      m_Name: Player
-      m_OriginalName: Player
+      m_Name: Main Menu
+      m_OriginalName: Main Menu
       m_EditFieldRect:
         serializedVersion: 2
         x: 0
         y: 0
         width: 0
         height: 0
-      m_UserData: 25344
+      m_UserData: 25542
       m_IsWaitingForDelay: 0
       m_IsRenaming: 0
       m_OriginalEventType: 0
