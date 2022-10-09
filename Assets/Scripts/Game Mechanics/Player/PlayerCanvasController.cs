@@ -12,6 +12,7 @@ namespace Player.Canvas
 
         [SerializeField] private GameObject deathPanel;
         [SerializeField] private GameObject _leaderBoard;
+        [SerializeField] private GameObject roundEndPanel;
         
         [SerializeField] private PlayerLeaderBoardData _playerLeaderBoardData;
         

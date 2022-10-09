@@ -16,7 +16,8 @@ namespace Multiplayer.Match
         #region Fields
 
         [SerializeField] private List<PlayerInfo> allPlayerInfos = new List<PlayerInfo>();
-
+        [SerializeField] private GameStates currentState;
+        
         private static MatchController _Instance;
         private int minePlayerIndex = 0;
         private List<PlayerLeaderBoardData> leaderBoardDatas = new List<PlayerLeaderBoardData>();
@@ -55,21 +56,25 @@ namespace Multiplayer.Match
             else
             {
                 NewPlayerSend(PhotonNetwork.NickName);
+                currentState = GameStates.Playing;
             }
         }
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Tab))
+            if (currentState == GameStates.Playing)
             {
-                ShowLeaderBoard();
-            }
-            if (Input.GetKeyUp(KeyCode.Tab))
-            {
-                if (PlayerCanvasController.Instance.leaderBoard.activeInHierarchy)
+                if (Input.GetKeyDown(KeyCode.Tab))
                 {
-                    PlayerCanvasController.Instance.leaderBoard.SetActive(false);
+                    ShowLeaderBoard();
                 }
+                if (Input.GetKeyUp(KeyCode.Tab))
+                {
+                    if (PlayerCanvasController.Instance.leaderBoard.activeInHierarchy)
+                    {
+                        PlayerCanvasController.Instance.leaderBoard.SetActive(false);
+                    }
+                }  
             }
         }
 
@@ -103,8 +108,9 @@ namespace Multiplayer.Match
 
         private void ListPlayerSend()
         {
-            object[] package = new object[allPlayerInfos.Count];
-
+            object[] package = new object[allPlayerInfos.Count+1];
+            package[0] = currentState;
+            
             for (int i = 0; i < allPlayerInfos.Count; i++)
             {
                 object[] piece = new object[4];
@@ -114,7 +120,7 @@ namespace Multiplayer.Match
                 piece[2] = allPlayerInfos[i].kills;
                 piece[3] = allPlayerInfos[i].deaths;
 
-                package[i] = piece;
+                package[i+1] = piece;
             }
             
             PhotonNetwork.RaiseEvent(
@@ -128,7 +134,9 @@ namespace Multiplayer.Match
         private void ListPlayerReceive(object[] dataRecevied)
         {
             allPlayerInfos.Clear();
-            for (int i = 0; i < dataRecevied.Length; i++)
+            currentState = (GameStates)dataRecevied[0];
+            
+            for (int i = 1; i < dataRecevied.Length; i++)
             {
                 object[] piece = (object[])dataRecevied[i];
 
@@ -139,7 +147,7 @@ namespace Multiplayer.Match
 
                 if (PhotonNetwork.LocalPlayer.ActorNumber == newPlayer.actor)
                 {
-                    minePlayerIndex = i;
+                    minePlayerIndex = i-1;
                 }
             }
         }
@@ -184,6 +192,8 @@ namespace Multiplayer.Match
                     break;
                 }
             }
+            
+            CheckScore();
         }
         
         private void UpdateStateDisplay()
@@ -251,6 +261,29 @@ namespace Multiplayer.Match
 
             return sortedList;
         }
+
+        private void CheckScore()
+        {
+            bool isWinnerFound = false;
+
+            foreach (PlayerInfo player in allPlayerInfos)
+            {
+                if ((player.kills - player.deaths) >= 3)
+                {
+                    isWinnerFound = true;
+                    break;
+                }
+            }
+
+            if (isWinnerFound)
+            {
+                if (PhotonNetwork.IsMasterClient && currentState != GameStates.End)
+                {
+                    currentState = GameStates.End;
+                    ListPlayerSend();
+                }
+            }
+        }
         #endregion
 
         #region Public Methods
@@ -281,6 +314,12 @@ namespace Multiplayer.Match
             }
         }
 
+        public override void OnLeftRoom()
+        {
+            base.OnLeftRoom();
+            SceneManager.LoadScene(0);
+        }
+
         #endregion
 
     }
@@ -303,5 +342,10 @@ namespace Multiplayer.Match
     public enum EventCodes : byte
     {
         NewPlayer,ListPlayers,UpdateStat
+    }
+
+    public enum GameStates
+    {
+        Waiting,Playing,End
     }
 }
