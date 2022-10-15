@@ -1,3 +1,4 @@
+using Multiplayer.Match;
 using Photon.Pun;
 using UnityEngine;
 
@@ -6,13 +7,17 @@ namespace Cam.Movement
     public class CameraMovement: MonoBehaviourPunCallbacks
     {
         #region Fields
-       
+
+        [SerializeField] private Transform endScreenCameraPos;
         [SerializeField] private bool invertMouseLook = false;
 
         private Transform followObject;
         private float xRotation = 0;
         private Vector2 mouseInput;
 
+        private GameStates currentState;
+        private bool isGameEnded = false;
+        
         #endregion
         
         #region Properties
@@ -22,34 +27,61 @@ namespace Cam.Movement
 
         #region Unity Methods
 
-        void Start()
+        public override void OnEnable()
         {
+            MatchController.onGameStateChanged += ControlCameraMovement;
+        }
+
+        public override void OnDisable()
+        {
+            MatchController.onGameStateChanged -= ControlCameraMovement;
+        }
+
+        void Start()
+        { 
             Cursor.lockState = CursorLockMode.Locked;
-            
         }
         
         void LateUpdate()
         {
             if (followObject != null)
             {
-                RotateCamera();
-                FollowObject();
+                if (isGameEnded)
+                {
+                    RotateCamera(endScreenCameraPos);
+                    FollowObject(endScreenCameraPos);
+                }
+                else
+                {
+                    RotateCamera(followObject);
+                    FollowObject(followObject);
+                }
             }
-           
         }
 
         #endregion
 
         #region Private Methods
 
-        void FollowObject()
+        private void ControlCameraMovement(GameStates state)
         {
-            transform.position = followObject.position;
+            if (state == GameStates.End)
+            {
+                isGameEnded = true;
+            }
+            else
+            {
+                isGameEnded = false;
+            }
+        }
+        void FollowObject(Transform objectToFollow)
+        {
+            transform.position = objectToFollow.position;
         }
         
-        void RotateCamera()
+        void RotateCamera(Transform objectToFollow)
         {
-            transform.rotation = followObject.rotation;
+            transform.rotation = objectToFollow.rotation;
         }
 
         #endregion

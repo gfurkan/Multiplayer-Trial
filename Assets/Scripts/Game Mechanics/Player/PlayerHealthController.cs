@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using DG.Tweening;
 using Multiplayer.Match;
 using Photon.Pun;
@@ -16,6 +17,8 @@ namespace Player.Health
         
         private int currentHealth = 0;
         private PlayerSpawner spawner;
+
+        private bool isGameEnded = false;
         
         #endregion
         
@@ -60,10 +63,10 @@ namespace Player.Health
             DOVirtual.Int(5, 1, 5, v => PlayerCanvasController.Instance.SetSpawnTimeText(v)).OnComplete(SpawnPlayer);
         }
 
-        private void SpawnPlayer()
+        private async void SpawnPlayer()
         {
-            spawner.SpawnPlayer();
             PlayerCanvasController.Instance.CloseDeathPanel();
+            spawner.SpawnPlayer();
         }
 
         #endregion

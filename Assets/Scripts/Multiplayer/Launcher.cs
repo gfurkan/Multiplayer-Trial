@@ -28,7 +28,7 @@ namespace Multiplayer.Launcher
         private List<RoomInfoController> roomInfoList = new List<RoomInfoController>();
         private List<TextMeshProUGUI> playerNameList = new List<TextMeshProUGUI>();
 
-        private bool isNicknameSetted = false;
+        private static bool isNicknameSetted = false;
         #endregion
         
         #region Properties
@@ -52,6 +52,9 @@ namespace Multiplayer.Launcher
 #if UNITY_EDITOR
             testButton.SetActive(true);
 #endif
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
 
         #endregion

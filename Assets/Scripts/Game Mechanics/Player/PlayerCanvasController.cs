@@ -12,7 +12,7 @@ namespace Player.Canvas
 
         [SerializeField] private GameObject deathPanel;
         [SerializeField] private GameObject _leaderBoard;
-        [SerializeField] private GameObject roundEndPanel;
+        [SerializeField] private GameObject _roundEndPanel;
         
         [SerializeField] private PlayerLeaderBoardData _playerLeaderBoardData;
         
@@ -27,6 +27,8 @@ namespace Player.Canvas
         #region Properties
 
         public GameObject leaderBoard => _leaderBoard;
+        
+        public GameObject roundEndPanel => _roundEndPanel;
         public PlayerLeaderBoardData playerLeaderBoardData => _playerLeaderBoardData;
 
         #endregion

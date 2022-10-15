@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
@@ -17,7 +18,9 @@ namespace Multiplayer.Match
 
         [SerializeField] private List<PlayerInfo> allPlayerInfos = new List<PlayerInfo>();
         [SerializeField] private GameStates currentState;
-        
+        [SerializeField] private float endingDelay;
+
+        public static event Action<GameStates> onGameStateChanged;
         private static MatchController _Instance;
         private int minePlayerIndex = 0;
         private List<PlayerLeaderBoardData> leaderBoardDatas = new List<PlayerLeaderBoardData>();
@@ -56,7 +59,7 @@ namespace Multiplayer.Match
             else
             {
                 NewPlayerSend(PhotonNetwork.NickName);
-                currentState = GameStates.Playing;
+                UpdateGameState(GameStates.Playing);
             }
         }
 
@@ -134,8 +137,8 @@ namespace Multiplayer.Match
         private void ListPlayerReceive(object[] dataRecevied)
         {
             allPlayerInfos.Clear();
-            currentState = (GameStates)dataRecevied[0];
-            
+            UpdateGameState((GameStates)dataRecevied[0]);
+
             for (int i = 1; i < dataRecevied.Length; i++)
             {
                 object[] piece = (object[])dataRecevied[i];
@@ -150,6 +153,8 @@ namespace Multiplayer.Match
                     minePlayerIndex = i-1;
                 }
             }
+            
+            CheckState();
         }
 
         public void UpdateStatsSend(int actorSending,int statToUpdate,int amountToChange)
@@ -279,15 +284,57 @@ namespace Multiplayer.Match
             {
                 if (PhotonNetwork.IsMasterClient && currentState != GameStates.End)
                 {
-                    currentState = GameStates.End;
+                    
+                    UpdateGameState(GameStates.End);
+                    
                     ListPlayerSend();
                 }
             }
+        }
+
+        private void CheckState()
+        {
+            if (currentState == GameStates.End)
+            {
+                FinishGame();
+            }
+        }
+
+        private void FinishGame()
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                PhotonNetwork.DestroyAll();
+            }
+
+            PlayerCanvasController.Instance.roundEndPanel.SetActive(true);
+            ShowLeaderBoard();
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            StartCoroutine(GoToMainMenu(endingDelay));
+        }
+
+        private IEnumerator GoToMainMenu(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+
+            PhotonNetwork.AutomaticallySyncScene = false;
+            PhotonNetwork.LeaveRoom();
         }
         #endregion
 
         #region Public Methods
 
+        public void UpdateGameState(GameStates state)
+        {
+            if (currentState != state)
+            {
+                currentState = state;
+                onGameStateChanged?.Invoke(state);
+            }
+        }
         
         public void OnEvent(EventData photonEvent)
         {

@@ -1304,6 +1304,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allPlayerInfos: []
+  currentState: 0
+  endingDelay: 5
 --- !u!4 &427977678
 Transform:
   m_ObjectHideFlags: 0
@@ -2760,6 +2762,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a46235cd27b43364788bd1edbd2778f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  endScreenCameraPos: {fileID: 1283524192}
   invertMouseLook: 0
 --- !u!1 &965107477 stripped
 GameObject:
@@ -4940,7 +4943,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   deathPanel: {fileID: 1118323096}
   _leaderBoard: {fileID: 150914151}
-  roundEndPanel: {fileID: 1053568589}
+  _roundEndPanel: {fileID: 299170606}
   _playerLeaderBoardData: {fileID: 1704710201}
   deathText: {fileID: 1802590407}
   spawnTimeText: {fileID: 1149782551}
