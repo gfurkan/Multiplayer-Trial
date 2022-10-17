@@ -45,20 +45,26 @@ namespace Player.Shoot
 
         void Start()
         {
+
             cam = Camera.main;
-            weaponCam = cam.transform.GetChild(0).gameObject;
-            normalFOV = cam.fieldOfView;
             
-            sniperAnimator = guns[2].GetComponent<Animator>();
             time = shootingDelay;
             tempValue = muzzleCounter;
             
             photonView.RPC("SetGun",RpcTarget.All,gunIndex);
             healthController = GetComponent<PlayerHealthController>();
             playerMovement=GetComponent<PlayerMovement>();
+            
+            if (photonView.IsMine)
+            {
+                weaponCam = cam.transform.GetChild(0).gameObject;
+                normalFOV = cam.fieldOfView;
+                sniperAnimator = guns[2].GetComponent<Animator>();
+            }
+            
             SetGunPosition();
         }
-        
+         
         void Update()
         {
             if (photonView.IsMine)

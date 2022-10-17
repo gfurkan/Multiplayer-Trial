@@ -1,12 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
 using ExitGames.Client.Photon;
 using Photon.Realtime;
 using Player.Canvas;
 using Player.LeaderBoard;
+using Player.Spawn;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,9 +19,9 @@ namespace Multiplayer.Match
         #region Fields
 
         [SerializeField] private List<PlayerInfo> allPlayerInfos = new List<PlayerInfo>();
-        [SerializeField] private GameStates currentState;
+        [SerializeField] private GameStates _currentState;
         [SerializeField] private float endingDelay;
-
+        [SerializeField] private bool isPerpetual = false;
         public static event Action<GameStates> onGameStateChanged;
         private static MatchController _Instance;
         private int minePlayerIndex = 0;
@@ -30,6 +32,7 @@ namespace Multiplayer.Match
         #region Properties
 
         public static MatchController Instance => _Instance;
+        public GameStates currentState => _currentState;
         
         #endregion
 
@@ -65,7 +68,7 @@ namespace Multiplayer.Match
 
         private void Update()
         {
-            if (currentState == GameStates.Playing)
+            if (_currentState == GameStates.Playing)
             {
                 if (Input.GetKeyDown(KeyCode.Tab))
                 {
@@ -112,7 +115,7 @@ namespace Multiplayer.Match
         private void ListPlayerSend()
         {
             object[] package = new object[allPlayerInfos.Count+1];
-            package[0] = currentState;
+            package[0] = _currentState;
             
             for (int i = 0; i < allPlayerInfos.Count; i++)
             {
@@ -282,7 +285,7 @@ namespace Multiplayer.Match
 
             if (isWinnerFound)
             {
-                if (PhotonNetwork.IsMasterClient && currentState != GameStates.End)
+                if (PhotonNetwork.IsMasterClient && _currentState != GameStates.End)
                 {
                     
                     UpdateGameState(GameStates.End);
@@ -294,7 +297,7 @@ namespace Multiplayer.Match
 
         private void CheckState()
         {
-            if (currentState == GameStates.End)
+            if (_currentState == GameStates.End)
             {
                 FinishGame();
             }
@@ -320,8 +323,48 @@ namespace Multiplayer.Match
         {
             yield return new WaitForSeconds(delay);
 
-            PhotonNetwork.AutomaticallySyncScene = false;
-            PhotonNetwork.LeaveRoom();
+            if (!isPerpetual)
+            {
+                PhotonNetwork.AutomaticallySyncScene = false;
+                PhotonNetwork.LeaveRoom();
+            }
+            else
+            {
+                if (PhotonNetwork.IsMasterClient)
+                { 
+                    NextMatchSend();
+                }
+            }
+        }
+
+        private void NextMatchSend()
+        {
+            PhotonNetwork.RaiseEvent(
+                (byte)EventCodes.NextMatch,
+                null,
+                new RaiseEventOptions { Receivers = ReceiverGroup.All },
+                new SendOptions { Reliability = true }
+            );
+        }
+
+        private void NextMatchReceive()
+        {
+            UpdateGameState(GameStates.Playing);
+            
+            PlayerCanvasController.Instance.roundEndPanel.SetActive(false);
+            PlayerCanvasController.Instance.leaderBoard.SetActive(false);
+
+            foreach (PlayerInfo player in allPlayerInfos)
+            {
+                player.kills = 0;
+                player.deaths = 0;
+            }
+            
+            UpdateStateDisplay();
+            PlayerSpawner.Instance.SpawnPlayer();
+            
+            Cursor.lockState = CursorLockMode.Locked;
+
         }
         #endregion
 
@@ -329,9 +372,9 @@ namespace Multiplayer.Match
 
         public void UpdateGameState(GameStates state)
         {
-            if (currentState != state)
+            if (_currentState != state)
             {
-                currentState = state;
+                _currentState = state;
                 onGameStateChanged?.Invoke(state);
             }
         }
@@ -356,6 +399,11 @@ namespace Multiplayer.Match
                     case EventCodes.UpdateStat:
                         
                         UpdateStatsReceive(data);
+                        break;
+                    
+                    case EventCodes.NextMatch:
+                        
+                        NextMatchReceive();
                         break;
                 }
             }
@@ -388,7 +436,7 @@ namespace Multiplayer.Match
 
     public enum EventCodes : byte
     {
-        NewPlayer,ListPlayers,UpdateStat
+        NewPlayer,ListPlayers,UpdateStat,NextMatch
     }
 
     public enum GameStates

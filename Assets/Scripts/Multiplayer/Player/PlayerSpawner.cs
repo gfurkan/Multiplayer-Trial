@@ -1,20 +1,29 @@
+using Managers.Singleton;
 using Managers.Spawn;
 using Photon.Pun;
 using UnityEngine;
 
 namespace Player.Spawn
 {
-    public class PlayerSpawner: MonoBehaviour
+    public class PlayerSpawner: SingletonManager<PlayerSpawner>
     {
         #region Fields
 
         [SerializeField] private GameObject playerPrefab;
 
-        private GameObject currentPlayer;
+        private GameObject _currentPlayer;
         #endregion
         
         #region Properties
-        
+
+        public GameObject currentPlayer
+        {
+            get => _currentPlayer;
+            set
+            {
+                _currentPlayer = value;
+            }
+        }
         
         #endregion
 
@@ -38,8 +47,11 @@ namespace Player.Spawn
 
         public void SpawnPlayer()
         {
-            Transform spawnPosition = SpawnManager.Instance.GetRandomSpawnPosition();
-            currentPlayer=PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition.position, spawnPosition.rotation);
+            if (_currentPlayer == null)
+            {
+                Transform spawnPosition = SpawnManager.Instance.GetRandomSpawnPosition();
+                _currentPlayer=PhotonNetwork.Instantiate(playerPrefab.name, spawnPosition.position, spawnPosition.rotation);
+            }
         }
 
         #endregion

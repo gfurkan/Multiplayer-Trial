@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using DG.Tweening;
 using Multiplayer.Match;
 using Photon.Pun;
@@ -16,7 +15,6 @@ namespace Player.Health
         [SerializeField] private ParticleSystem deathParticle;
         
         private int currentHealth = 0;
-        private PlayerSpawner spawner;
 
         private bool isGameEnded = false;
         
@@ -36,7 +34,6 @@ namespace Player.Health
             {
                 currentHealth = maxHealth;
                 PlayerCanvasController.Instance.SetHealthText(currentHealth);
-                spawner = GameObject.FindGameObjectWithTag("PlayerSpawner").GetComponent<PlayerSpawner>();
             }
            
         }
@@ -50,6 +47,7 @@ namespace Player.Health
         {
             PhotonNetwork.Instantiate(deathParticle.name, transform.position, Quaternion.identity);
             PhotonNetwork.Destroy(gameObject);
+            PlayerSpawner.Instance.currentPlayer = null;
             
             PlayerCanvasController.Instance.OpenDeathPanel(shooterName);
             ControlSpawningTime();
@@ -63,10 +61,14 @@ namespace Player.Health
             DOVirtual.Int(5, 1, 5, v => PlayerCanvasController.Instance.SetSpawnTimeText(v)).OnComplete(SpawnPlayer);
         }
 
-        private async void SpawnPlayer()
+        private void SpawnPlayer()
         {
             PlayerCanvasController.Instance.CloseDeathPanel();
-            spawner.SpawnPlayer();
+            
+            if (MatchController.Instance.currentState == GameStates.Playing)
+            {
+                PlayerSpawner.Instance.SpawnPlayer();
+            }
         }
 
         #endregion

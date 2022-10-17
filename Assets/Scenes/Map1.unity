@@ -1304,8 +1304,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allPlayerInfos: []
-  currentState: 0
+  _currentState: 0
   endingDelay: 5
+  isPerpetual: 1
 --- !u!4 &427977678
 Transform:
   m_ObjectHideFlags: 0
