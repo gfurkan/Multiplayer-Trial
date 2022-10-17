@@ -13,6 +13,8 @@ namespace Player.Canvas
         [SerializeField] private GameObject deathPanel;
         [SerializeField] private GameObject _leaderBoard;
         [SerializeField] private GameObject _roundEndPanel;
+        [SerializeField] private GameObject scopeImage;
+        [SerializeField] private GameObject crossHair;
         
         [SerializeField] private PlayerLeaderBoardData _playerLeaderBoardData;
         
@@ -76,6 +78,12 @@ namespace Player.Canvas
         public void SetDeathsText(int value)
         {
             deathsText.text = "DEATHS " + value;
+        }
+
+        public void ControlSniperScope(bool val)
+        {
+            crossHair.SetActive(!val);
+            scopeImage.SetActive(val);
         }
         #endregion
     }

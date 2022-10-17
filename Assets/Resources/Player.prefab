@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2149136137463555294}
   - component: {fileID: 2149136137463555289}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Machine Gun
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -92,7 +92,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2149136137904368552}
   - component: {fileID: 2149136137904368555}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pistol
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -241,6 +241,7 @@ MonoBehaviour:
   runSpeed: 8
   jumpForce: 12
   gravityMultiplier: 2.5
+  scopeRotationDivider: 5
   rotationSensitivity: 2
   invertMouseLook: 1
   viewPoint: {fileID: 2149136137719478849}
@@ -256,16 +257,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f89a717a53e5df4a9297083d7b5f357, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bulletImpactPrefab: {fileID: 2979750814204915761, guid: d99f494f6cab6ab48beee97f4367f687, type: 3}
-  shootingDelay: 0.15
-  muzzleCounter: 0.016666668
   guns:
   - {fileID: 2149136137904368555}
   - {fileID: 2149136137463555289}
   - {fileID: 2149136138128524256}
+  bulletImpactPrefab: {fileID: 2979750814204915761, guid: d99f494f6cab6ab48beee97f4367f687, type: 3}
   playerImpact: {fileID: 2979750814204915761, guid: 63e1f7855e0114242a11b93dc59117e1, type: 3}
   gunHolderInHand: {fileID: 3323036518439518544}
   gunHolderInPlayer: {fileID: 2149136138580653566}
+  shootingDelay: 0.15
+  muzzleCounter: 0.016666668
+  scopedFOV: 10
 --- !u!114 &981343290040444981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -361,7 +363,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2149136138128524257}
   - component: {fileID: 2149136138128524256}
-  m_Layer: 0
+  - component: {fileID: 5681480451812536945}
+  - component: {fileID: 5636909467624664536}
+  m_Layer: 6
   m_Name: Rifle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -401,6 +405,39 @@ MonoBehaviour:
   _shootingDelay: 0.4
   _muzzleFlash: {fileID: 1230092100947165306}
   _damageValue: 20
+--- !u!95 &5681480451812536945
+Animator:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149136138128524262}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: ecb5d1e4fbcd1e2489858f581eb3c6e8, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &5636909467624664536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2149136138128524262}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1456478b65a60e9408999c39018451d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shootController: {fileID: 2149136138074625642}
 --- !u!1 &2149136138373344541
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,7 +530,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2149136138580653566}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: GunHolder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -573,6 +610,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: blasterE
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3b7c14d870fdc314f8060a632c4fa82b, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3b7c14d870fdc314f8060a632c4fa82b, type: 3}
 --- !u!4 &1898824229170229259 stripped
@@ -634,6 +675,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
       propertyPath: m_Name
       value: Muzzle_Flash (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
       propertyPath: m_IsActive
@@ -706,6 +751,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: blasterG
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 94d92f057ca27234aa28b52a90ef44e1, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 94d92f057ca27234aa28b52a90ef44e1, type: 3}
 --- !u!4 &1898824228393126297 stripped
@@ -767,6 +816,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
       propertyPath: m_Name
       value: Muzzle_Flash (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
       propertyPath: m_IsActive
@@ -839,6 +892,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: blasterD
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 57f080b300fdcf94f8f7a8fa9ce12149, type: 3}
+      propertyPath: m_Layer
+      value: 6
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57f080b300fdcf94f8f7a8fa9ce12149, type: 3}
 --- !u!4 &1898824227776218180 stripped
@@ -900,6 +957,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
       propertyPath: m_Name
       value: Muzzle_Flash
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
+      propertyPath: m_Layer
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 198102fde069568459d5c53a6ec14211, type: 3}
       propertyPath: m_IsActive

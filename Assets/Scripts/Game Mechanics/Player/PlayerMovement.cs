@@ -18,6 +18,7 @@ namespace Player.Movement
         [SerializeField] private float runSpeed = 0;
         [SerializeField] private float jumpForce = 0;
         [SerializeField] private float gravityMultiplier = 0;
+        [SerializeField] private float scopeRotationDivider = 0;
         
         [Header("Rotation")]
         [SerializeField] private float rotationSensitivity = 0;
@@ -36,11 +37,21 @@ namespace Player.Movement
         private bool isJumped = false;
         private CharacterController characterController;
         private PlayerAnimationController animationController;
+
+        private bool _isScoping = false;
         
         #endregion
         
         #region Properties
-        
+
+        public bool isScoping
+        {
+            get => _isScoping;
+            set
+            {
+                _isScoping = value;
+            }
+        }
         
         #endregion
 
@@ -122,7 +133,7 @@ namespace Player.Movement
             
             xRotation +=mouseInput.y;
             xRotation = Mathf.Clamp(xRotation, -60, 60);
-            
+
             if (invertMouseLook)
             {
                 viewPoint.rotation=Quaternion.Euler(-xRotation,viewPoint.rotation.eulerAngles.y,viewPoint.rotation.eulerAngles.z);
@@ -140,7 +151,14 @@ namespace Player.Movement
         }
         void CalculateMouseInput()
         {
-            mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"))*rotationSensitivity;
+            float rotator = rotationSensitivity;
+            
+            if (isScoping)
+            {
+                rotator /= scopeRotationDivider;
+            }
+      
+            mouseInput = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"))*rotator;
         }
         void CalculateMovementValues()
         {

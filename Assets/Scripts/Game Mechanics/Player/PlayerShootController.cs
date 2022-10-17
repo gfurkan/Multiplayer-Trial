@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 using Gun.Settings;
 using Photon.Pun;
+using Player.Canvas;
 using Player.Health;
+using Player.Movement;
 using UnityEngine;
 
 namespace Player.Shoot
@@ -10,23 +12,27 @@ namespace Player.Shoot
     {
         #region Fields
 
-        [SerializeField] private GameObject bulletImpactPrefab;
-        [SerializeField] private float shootingDelay = 0,muzzleCounter=0;
         [SerializeField] private GunSettings[] guns;
+        [SerializeField] private GameObject bulletImpactPrefab;
         [SerializeField] private GameObject playerImpact;
         [SerializeField] private Transform gunHolderInHand, gunHolderInPlayer;
+        [SerializeField] private float shootingDelay = 0,muzzleCounter=0,scopedFOV=0;
         
+        private float normalFOV = 0;
+        private GameObject weaponCam;
+        private Animator sniperAnimator;
         private Camera cam;
         private float time = 0;
         private float flashRotationY = 0;
 
         private int damageToDeal = 0;
         private int gunIndex = 0;
-        private GunSettings activeGun;
-        
-        float tempValue = 0;
         private bool isAutoFireEnabled = false;
+        private float tempValue = 0;
+        
+        private GunSettings activeGun;
         private PlayerHealthController healthController;
+        private PlayerMovement playerMovement;
         
         #endregion
         
@@ -40,11 +46,16 @@ namespace Player.Shoot
         void Start()
         {
             cam = Camera.main;
+            weaponCam = cam.transform.GetChild(0).gameObject;
+            normalFOV = cam.fieldOfView;
+            
+            sniperAnimator = guns[2].GetComponent<Animator>();
             time = shootingDelay;
             tempValue = muzzleCounter;
             
             photonView.RPC("SetGun",RpcTarget.All,gunIndex);
             healthController = GetComponent<PlayerHealthController>();
+            playerMovement=GetComponent<PlayerMovement>();
             SetGunPosition();
         }
         
@@ -81,6 +92,22 @@ namespace Player.Shoot
                     activeGun.muzzleFlash.SetActive(false);
                 }
 
+                if (gunIndex == 2)
+                {
+                    if (Input.GetButtonDown("Fire2"))
+                    {
+                        sniperAnimator.SetBool("Aim", true);
+                    }
+                
+                    if (Input.GetButtonUp("Fire2"))
+                    {
+                        sniperAnimator.SetBool("Aim", false);
+                        PlayerCanvasController.Instance.ControlSniperScope(false);
+                        ChangeFovOfCamera(false);
+                    }
+                }
+            
+                
                 if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f)
                 {
                     gunIndex++;
@@ -247,7 +274,21 @@ namespace Player.Shoot
 
         #region Public Methods
 
-        
+        public void ChangeFovOfCamera(bool isAiming)
+        {
+            if (isAiming)
+            {
+                weaponCam.gameObject.SetActive(false);
+                cam.fieldOfView = scopedFOV;
+                playerMovement.isScoping = true;
+            }
+            else
+            {
+                weaponCam.gameObject.SetActive(true);
+                cam.fieldOfView = normalFOV;
+                playerMovement.isScoping = false;
+            }
+        }
 
         #endregion
     }
