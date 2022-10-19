@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
 using ExitGames.Client.Photon;
@@ -10,7 +9,6 @@ using Player.Canvas;
 using Player.LeaderBoard;
 using Player.Spawn;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Multiplayer.Match
 {
@@ -20,12 +18,15 @@ namespace Multiplayer.Match
 
         [SerializeField] private List<PlayerInfo> allPlayerInfos = new List<PlayerInfo>();
         [SerializeField] private GameStates _currentState;
+        
+        [SerializeField] private float matchTime = 0;
         [SerializeField] private float endingDelay;
         [SerializeField] private bool isPerpetual = false;
         public static event Action<GameStates> onGameStateChanged;
         private static MatchController _Instance;
         private int minePlayerIndex = 0;
         private List<PlayerLeaderBoardData> leaderBoardDatas = new List<PlayerLeaderBoardData>();
+        private float currentTime = 0;
         
         #endregion
         
@@ -55,6 +56,8 @@ namespace Multiplayer.Match
 
         void Start()
         {
+            currentTime = matchTime;
+            
             if (!PhotonNetwork.IsConnected)
             {
                 SceneManager.LoadScene(0);
@@ -63,6 +66,7 @@ namespace Multiplayer.Match
             {
                 NewPlayerSend(PhotonNetwork.NickName);
                 UpdateGameState(GameStates.Playing);
+                SetupTimer();
             }
         }
 
@@ -80,7 +84,23 @@ namespace Multiplayer.Match
                     {
                         PlayerCanvasController.Instance.leaderBoard.SetActive(false);
                     }
-                }  
+                }
+
+                if (currentTime > 0f)
+                {
+                    currentTime -= Time.deltaTime;
+                    if (currentTime <= 0f)
+                    {
+                        currentTime = 0;
+
+                        if (PhotonNetwork.IsMasterClient)
+                        {
+                            UpdateGameState(GameStates.End);
+                            ListPlayerSend();
+                        }
+                    }
+                    ControlTime();
+                }
             }
         }
 
@@ -363,8 +383,23 @@ namespace Multiplayer.Match
             UpdateStateDisplay();
             PlayerSpawner.Instance.SpawnPlayer();
             
+            SetupTimer();
             Cursor.lockState = CursorLockMode.Locked;
 
+        }
+
+        private void SetupTimer()
+        {
+            if (matchTime > 0)
+            {
+                currentTime = matchTime;
+                ControlTime();
+            }
+        }
+        private void ControlTime()
+        {
+            var timeToDisplay = System.TimeSpan.FromSeconds(currentTime);
+            PlayerCanvasController.Instance.SetTimeText(timeToDisplay);
         }
         #endregion
 

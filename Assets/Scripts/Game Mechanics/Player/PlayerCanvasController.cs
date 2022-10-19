@@ -23,6 +23,7 @@ namespace Player.Canvas
         [SerializeField] private TextMeshProUGUI healthText;
         [SerializeField] private TextMeshProUGUI killsText;
         [SerializeField] private TextMeshProUGUI deathsText;
+        [SerializeField] private TextMeshProUGUI timeText;
         
         #endregion
 
@@ -85,6 +86,12 @@ namespace Player.Canvas
             crossHair.SetActive(!val);
             scopeImage.SetActive(val);
         }
+
+        public void SetTimeText(TimeSpan span)
+        {
+            timeText.text = span.Minutes.ToString("00") + ":" + span.Seconds.ToString("00");
+        }
+        
         #endregion
     }
   
