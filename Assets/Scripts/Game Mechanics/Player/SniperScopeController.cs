@@ -18,7 +18,7 @@ namespace Player.Shoot.Sniper
         public void OpenSniperScope()
         {
             PlayerCanvasController.Instance.ControlSniperScope(true);
-            shootController.ChangeFovOfCamera(true);
+            shootController.ChangeFovOfCameraForSniper(true);
         }
 
         #endregion

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Cam.Movement;
 using Photon.Pun;
 using Player.Animation;
+using Player.Canvas;
 
 
 namespace Player.Movement
@@ -38,20 +39,12 @@ namespace Player.Movement
         private CharacterController characterController;
         private PlayerAnimationController animationController;
 
-        private bool _isScoping = false;
+        private bool isScoping = false;
         
         #endregion
         
         #region Properties
 
-        public bool isScoping
-        {
-            get => _isScoping;
-            set
-            {
-                _isScoping = value;
-            }
-        }
         
         #endregion
 
@@ -75,16 +68,22 @@ namespace Player.Movement
         {
             if (photonView.IsMine)
             {
-                MovePlayer();
-                RotatePlayer();
+                if (!PlayerCanvasController.Instance.isPaused)
+                {
+                    MovePlayer();
+                    RotatePlayer();
 
-                if (Input.GetKeyDown(KeyCode.LeftShift))
-                {
-                    movementSpeed = runSpeed;
-                }
-                else if (Input.GetKeyUp(KeyCode.LeftShift))
-                {
-                    movementSpeed = walkSpeed;
+                    if (!isScoping)
+                    {
+                        if (Input.GetKeyDown(KeyCode.LeftShift))
+                        {
+                            movementSpeed = runSpeed;
+                        }
+                        else if (Input.GetKeyUp(KeyCode.LeftShift))
+                        {
+                            movementSpeed = walkSpeed;
+                        }
+                    }
                 }
             }
         }
@@ -169,7 +168,18 @@ namespace Player.Movement
 
         #region Public Methods
 
-        
+        public void ControlScopeMovement(bool val)
+        {
+            if (val)
+            {
+                isScoping = true;
+                movementSpeed = walkSpeed;
+            }
+            else
+            {
+                isScoping = false;
+            }
+        }
 
         #endregion
     }

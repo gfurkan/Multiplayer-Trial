@@ -10,6 +10,7 @@ namespace Gun.Settings
         [SerializeField] private float _shootingDelay = 0.15f;
         [SerializeField] private GameObject _muzzleFlash;
         [SerializeField] private int _damageValue = 0;
+        [SerializeField] private MeshRenderer renderer;
         
         #endregion
         
@@ -27,16 +28,6 @@ namespace Gun.Settings
 
         #region Unity Methods
 
-        void Start()
-        {
-             
-        }
-        
-        void Update()
-        {
-             
-        }
-
         #endregion
 
         #region Private Methods
@@ -47,7 +38,10 @@ namespace Gun.Settings
 
         #region Public Methods
 
-        
+        public void ControlRenderer(bool val)
+        {
+            renderer.enabled = val;
+        }
 
         #endregion
     }

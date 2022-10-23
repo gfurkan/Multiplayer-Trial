@@ -46,7 +46,11 @@ namespace Multiplayer.Launcher
         void Start()
         {
              CloseMenu();
-             ConnectToNetwork();
+             if (!PhotonNetwork.IsConnected)
+             {
+                 ConnectToNetwork(); 
+             }
+             
              roomNameInput.characterLimit = roomNameCharacterLimit;
 
 #if UNITY_EDITOR

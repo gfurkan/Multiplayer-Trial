@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using DG.Tweening;
 using Gun.Settings;
 using Photon.Pun;
 using Player.Canvas;
@@ -16,7 +17,8 @@ namespace Player.Shoot
         [SerializeField] private GameObject bulletImpactPrefab;
         [SerializeField] private GameObject playerImpact;
         [SerializeField] private Transform gunHolderInHand, gunHolderInPlayer;
-        [SerializeField] private float shootingDelay = 0,muzzleCounter=0,scopedFOV=0;
+        [SerializeField] private float shootingDelay = 0,muzzleCounter=0,sniperScopedFOV=0,normalGunScopedFOV=0;
+        [SerializeField] private float normalGunScopeSpeed = 0;
         
         private float normalFOV = 0;
         private GameObject weaponCam;
@@ -33,7 +35,8 @@ namespace Player.Shoot
         private GunSettings activeGun;
         private PlayerHealthController healthController;
         private PlayerMovement playerMovement;
-        
+
+        private Sequence scopeZoomIn, scopeZoomOut;
         #endregion
         
         #region Properties
@@ -57,7 +60,6 @@ namespace Player.Shoot
             
             if (photonView.IsMine)
             {
-                weaponCam = cam.transform.GetChild(0).gameObject;
                 normalFOV = cam.fieldOfView;
                 sniperAnimator = guns[2].GetComponent<Animator>();
             }
@@ -69,7 +71,9 @@ namespace Player.Shoot
         {
             if (photonView.IsMine)
             {
-                DisableMuzzleFlash();
+                if (!PlayerCanvasController.Instance.isPaused)
+                {
+                    DisableMuzzleFlash();
             
                 if (Input.GetButtonDown("Fire1"))
                 {
@@ -109,10 +113,22 @@ namespace Player.Shoot
                     {
                         sniperAnimator.SetBool("Aim", false);
                         PlayerCanvasController.Instance.ControlSniperScope(false);
-                        ChangeFovOfCamera(false);
+                        ChangeFovOfCameraForSniper(false);
                     }
                 }
-            
+
+                else
+                {
+                    if (Input.GetButtonDown("Fire2"))
+                    {
+                        ChangeFovOfCameraForOthers(true);
+                    }
+                
+                    if (Input.GetButtonUp("Fire2"))
+                    {
+                        ChangeFovOfCameraForOthers(false);
+                    }
+                }
                 
                 if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f)
                 {
@@ -135,6 +151,7 @@ namespace Player.Shoot
                     photonView.RPC("SetGun",RpcTarget.All,gunIndex);
                 }
                 ChangeGunWithNumberKeys();  
+                }
             }
 
         }
@@ -198,6 +215,7 @@ namespace Player.Shoot
             
             SetDamageToDeal(activeGun);
             activeGun.gameObject.SetActive(true);
+            activeGun.ControlRenderer(true);
         }
 
         [PunRPC]
@@ -280,19 +298,40 @@ namespace Player.Shoot
 
         #region Public Methods
 
-        public void ChangeFovOfCamera(bool isAiming)
+        public void ChangeFovOfCameraForSniper(bool isAiming)
         {
             if (isAiming)
             {
-                weaponCam.gameObject.SetActive(false);
-                cam.fieldOfView = scopedFOV;
-                playerMovement.isScoping = true;
+               // weaponCam.gameObject.SetActive(false);
+               activeGun.ControlRenderer(false);
+                cam.fieldOfView = sniperScopedFOV;
+                playerMovement.ControlScopeMovement(true);
             }
             else
             {
-                weaponCam.gameObject.SetActive(true);
-                cam.fieldOfView = normalFOV;
-                playerMovement.isScoping = false;
+              //  weaponCam.gameObject.SetActive(true);
+              activeGun.ControlRenderer(true);
+              cam.fieldOfView = normalFOV;
+              playerMovement.ControlScopeMovement(false);
+            }
+        }
+
+        public void ChangeFovOfCameraForOthers(bool isAiming)
+        {
+            DOTween.PauseAll();
+            
+            if (isAiming)
+            {
+                playerMovement.ControlScopeMovement(true);
+                scopeZoomIn = DOTween.Sequence();
+                scopeZoomIn.Append(DOVirtual.Float(cam.fieldOfView, normalGunScopedFOV, normalGunScopeSpeed, v => cam.fieldOfView = v));
+            }
+            else
+            {
+                playerMovement.ControlScopeMovement(false);
+                scopeZoomOut = DOTween.Sequence();
+                scopeZoomOut.Append(DOVirtual.Float(cam.fieldOfView, normalFOV, normalGunScopeSpeed, v => cam.fieldOfView = v));
+
             }
         }
 

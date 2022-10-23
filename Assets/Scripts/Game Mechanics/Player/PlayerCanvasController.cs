@@ -1,5 +1,6 @@
 using System;
 using Managers.Singleton;
+using Photon.Pun;
 using Player.LeaderBoard;
 using TMPro;
 using UnityEngine;
@@ -15,6 +16,7 @@ namespace Player.Canvas
         [SerializeField] private GameObject _roundEndPanel;
         [SerializeField] private GameObject scopeImage;
         [SerializeField] private GameObject crossHair;
+        [SerializeField] private GameObject pausePanel;
         
         [SerializeField] private PlayerLeaderBoardData _playerLeaderBoardData;
         
@@ -24,16 +26,19 @@ namespace Player.Canvas
         [SerializeField] private TextMeshProUGUI killsText;
         [SerializeField] private TextMeshProUGUI deathsText;
         [SerializeField] private TextMeshProUGUI timeText;
+
+        private bool isTimerActive = true;
+        private bool _isPaused = false;
         
         #endregion
 
         #region Properties
 
         public GameObject leaderBoard => _leaderBoard;
-        
         public GameObject roundEndPanel => _roundEndPanel;
         public PlayerLeaderBoardData playerLeaderBoardData => _playerLeaderBoardData;
-
+        public bool isPaused => _isPaused;
+        
         #endregion
         
         #region Unity Methods
@@ -42,6 +47,14 @@ namespace Player.Canvas
         {
             SetKillsText(0);
             SetDeathsText(0);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                ControlPausePanel();
+            }
         }
 
         #endregion
@@ -91,7 +104,43 @@ namespace Player.Canvas
         {
             timeText.text = span.Minutes.ToString("00") + ":" + span.Seconds.ToString("00");
         }
-        
+
+        public void ControlTimerActivity(bool val)
+        {
+            if (isTimerActive != val)
+            {
+                timeText.gameObject.SetActive(val);
+                isTimerActive = val;
+            }
+        }
+        public void ControlPausePanel()
+        {
+            if (pausePanel.activeInHierarchy)
+            {
+                pausePanel.SetActive(false);
+                _isPaused = false;
+                
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else
+            {
+                pausePanel.SetActive(true);
+                _isPaused = true;
+
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
+        public void GoToMainMenu()
+        {
+            PhotonNetwork.LeaveRoom();
+        }
+
+        public void QuitGame()
+        {
+            Application.Quit();
+        }
         #endregion
     }
   

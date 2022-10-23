@@ -27,6 +27,7 @@ namespace Multiplayer.Match
         private int minePlayerIndex = 0;
         private List<PlayerLeaderBoardData> leaderBoardDatas = new List<PlayerLeaderBoardData>();
         private float currentTime = 0;
+        private float sendTimer = 0;
         
         #endregion
         
@@ -56,6 +57,7 @@ namespace Multiplayer.Match
 
         void Start()
         {
+            PlayerCanvasController.Instance.ControlTimerActivity(false);
             currentTime = matchTime;
             
             if (!PhotonNetwork.IsConnected)
@@ -86,20 +88,28 @@ namespace Multiplayer.Match
                     }
                 }
 
-                if (currentTime > 0f)
+                if (PhotonNetwork.IsMasterClient)
                 {
-                    currentTime -= Time.deltaTime;
-                    if (currentTime <= 0f)
+                    if (currentTime > 0f)
                     {
-                        currentTime = 0;
-
-                        if (PhotonNetwork.IsMasterClient)
+                        currentTime -= Time.deltaTime;
+                        if (currentTime <= 0f)
                         {
+                            currentTime = 0;
                             UpdateGameState(GameStates.End);
                             ListPlayerSend();
                         }
+
+                        ControlTime();
+
+                        sendTimer -= Time.deltaTime;
+                        if (sendTimer <= 0)
+                        {
+                            sendTimer += 1;
+                            TimerSend();
+                        }
+
                     }
-                    ControlTime();
                 }
             }
         }
@@ -401,6 +411,28 @@ namespace Multiplayer.Match
             var timeToDisplay = System.TimeSpan.FromSeconds(currentTime);
             PlayerCanvasController.Instance.SetTimeText(timeToDisplay);
         }
+
+        private void TimerSend()
+        {
+            object[] package = new object[] {(int)currentTime, _currentState};
+            
+            PhotonNetwork.RaiseEvent(
+                (byte)EventCodes.TimeSync,
+                package,
+                new RaiseEventOptions { Receivers = ReceiverGroup.All },
+                new SendOptions { Reliability = true }
+            );
+        }
+
+        private void TimerReceive(object[] data)
+        {
+            currentTime = (int)data[0];
+            _currentState = (GameStates)data[1];
+            
+            ControlTime();
+            PlayerCanvasController.Instance.ControlTimerActivity(true);
+        }
+        
         #endregion
 
         #region Public Methods
@@ -440,6 +472,11 @@ namespace Multiplayer.Match
                         
                         NextMatchReceive();
                         break;
+                    
+                    case EventCodes.TimeSync:
+                        
+                        TimerReceive(data);
+                        break;
                 }
             }
         }
@@ -471,7 +508,7 @@ namespace Multiplayer.Match
 
     public enum EventCodes : byte
     {
-        NewPlayer,ListPlayers,UpdateStat,NextMatch
+        NewPlayer,ListPlayers,UpdateStat,NextMatch,TimeSync
     }
 
     public enum GameStates
