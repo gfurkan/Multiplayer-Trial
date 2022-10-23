@@ -11,6 +11,7 @@ namespace Gun.Settings
         [SerializeField] private GameObject _muzzleFlash;
         [SerializeField] private int _damageValue = 0;
         [SerializeField] private MeshRenderer renderer;
+        [SerializeField] private AudioSource gunSound;
         
         #endregion
         
@@ -43,6 +44,14 @@ namespace Gun.Settings
             renderer.enabled = val;
         }
 
+        public void PlayGunSound()
+        {
+            gunSound.Play();
+        }
+        public void StopGunSound()
+        {
+            gunSound.Stop();
+        }
         #endregion
     }
   

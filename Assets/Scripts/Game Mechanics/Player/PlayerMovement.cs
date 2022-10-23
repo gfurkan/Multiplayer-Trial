@@ -1,5 +1,3 @@
-using Managers.Spawn;
-using TMPro;
 using UnityEngine;
 using System.Runtime.InteropServices;
 using Cam.Movement;
@@ -25,6 +23,10 @@ namespace Player.Movement
         [SerializeField] private float rotationSensitivity = 0;
         [SerializeField] private bool invertMouseLook = false;
         [SerializeField] private Transform viewPoint;
+
+        [Header("Sounds")] 
+        [SerializeField] private AudioSource slowStepSound;
+        [SerializeField] private AudioSource fastStepSound;
         
         [DllImport("user32.dll")]
         static extern bool SetCursorPos(int X, int Y);
@@ -40,6 +42,7 @@ namespace Player.Movement
         private PlayerAnimationController animationController;
 
         private bool isScoping = false;
+        private bool isRunning = false;
         
         #endregion
         
@@ -77,10 +80,12 @@ namespace Player.Movement
                     {
                         if (Input.GetKeyDown(KeyCode.LeftShift))
                         {
+                            isRunning = true;
                             movementSpeed = runSpeed;
                         }
                         else if (Input.GetKeyUp(KeyCode.LeftShift))
                         {
+                            isRunning = false;
                             movementSpeed = walkSpeed;
                         }
                     }
@@ -94,6 +99,7 @@ namespace Player.Movement
         
         void MovePlayer()
         {
+            PlayStepSounds(isRunning);
             CalculateMovementValues();
             
             float YVelocity = movementVector.y;
@@ -163,7 +169,32 @@ namespace Player.Movement
         {
             movementDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
         }
-        
+
+        void PlayStepSounds(bool isRunning)
+        {
+            if (isRunning)
+            {
+                if (!fastStepSound.isPlaying && movementDirection!=Vector3.zero && !isJumped)
+                {
+                    fastStepSound.Play();
+                    slowStepSound.Stop();
+                }
+            }
+            else
+            {
+                if (!slowStepSound.isPlaying && movementDirection!=Vector3.zero && !isJumped)
+                {
+                    fastStepSound.Stop();
+                    slowStepSound.Play();
+                }
+            }
+
+            if (movementDirection == Vector3.zero || isJumped)
+            {
+                fastStepSound.Stop();
+                slowStepSound.Stop(); 
+            }
+        }
         #endregion
 
         #region Public Methods

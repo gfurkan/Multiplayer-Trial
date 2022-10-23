@@ -175,6 +175,8 @@ namespace Player.Shoot
 
             if (Physics.Raycast(CalculateShootingDirection(), out raycastHit,100))
             {
+                photonView.RPC("PlayGunSound",RpcTarget.All);
+                
                 if (raycastHit.transform.CompareTag("Player"))
                 {
                     PhotonNetwork.Instantiate(playerImpact.name, raycastHit.point, Quaternion.identity);
@@ -293,6 +295,13 @@ namespace Player.Shoot
                 gunHolderInPlayer.transform.localPosition = Vector3.zero;
                 gunHolderInPlayer.transform.localRotation=Quaternion.identity;
             }
+        }
+
+        [PunRPC]
+        private void PlayGunSound()
+        {
+            activeGun.StopGunSound();
+            activeGun.PlayGunSound();
         }
         #endregion
 
