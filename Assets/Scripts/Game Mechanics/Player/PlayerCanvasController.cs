@@ -1,5 +1,6 @@
 using System;
 using Managers.Singleton;
+using Multiplayer.Match;
 using Photon.Pun;
 using Player.LeaderBoard;
 using TMPro;
@@ -134,11 +135,17 @@ namespace Player.Canvas
         }
         public void GoToMainMenu()
         {
+            MatchController.Instance.OnPlayerLeft(PhotonNetwork.NickName);
+            PlayerPrefs.DeleteKey("roundTime");
+            PlayerPrefs.DeleteKey("averagePoint");
             PhotonNetwork.LeaveRoom();
         }
 
         public void QuitGame()
         {
+            MatchController.Instance.OnPlayerLeft(PhotonNetwork.NickName);
+            PlayerPrefs.DeleteKey("roundTime");
+            PlayerPrefs.DeleteKey("averagePoint");
             Application.Quit();
         }
         #endregion

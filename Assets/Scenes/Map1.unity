@@ -1789,7 +1789,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allPlayerInfos: []
   _currentState: 0
-  matchTime: 180
+  _roundTime: 5
+  _averagePoint: 10
   endingDelay: 5
   isPerpetual: 1
 --- !u!4 &427977678

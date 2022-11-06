@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using DG.Tweening;
 using Gun.Settings;
@@ -7,6 +8,7 @@ using Player.Canvas;
 using Player.Health;
 using Player.Movement;
 using UnityEngine;
+using UnityEngine.TextCore.Text;
 
 namespace Player.Shoot
 {
@@ -32,6 +34,9 @@ namespace Player.Shoot
         private int gunIndex = 0;
         private bool isAutoFireEnabled = false;
         private bool isScoped = false;
+        public bool isShootingDelayFinished = true;
+        private bool isCalculatingDelay = false;
+        
         private float tempValue = 0;
         
         private GunSettings activeGun;
@@ -39,7 +44,7 @@ namespace Player.Shoot
         private PlayerMovement playerMovement;
 
         private Sequence scopeZoomIn, scopeZoomOut;
-        
+
         #endregion
         
         #region Properties
@@ -87,83 +92,14 @@ namespace Player.Shoot
                 if (!PlayerCanvasController.Instance.isPaused)
                 {
                     DisableMuzzleFlash();
-            
-                if (Input.GetButtonDown("Fire1"))
-                {
-                    if (!isAutoFireEnabled)
-                    {
-                        Shoot(); 
-                    }
-                }
-            
-                if (Input.GetButton("Fire1"))
-                {
-                    if (isAutoFireEnabled)
-                    {
-                        time += Time.deltaTime;
-                        if (time > shootingDelay)
-                        { 
-                            Shoot(); 
-                            time = 0;
-                        }
-                    }
-                }
-                
-                if (Input.GetButtonUp("Fire1"))
-                {
-                    time = shootingDelay;
-                    activeGun.muzzleFlash.SetActive(false);
-                }
+                    ControlShooting(); 
+                    ControlScoping();
+                    ControlGunChanging();
 
-                if (gunIndex == 2)
-                {
-                    if (Input.GetButton("Fire2"))
+                    if (!isShootingDelayFinished && isCalculatingDelay)
                     {
-                        sniperAnimator.SetBool("Aim", true);
+                        ControlShootingDelay();
                     }
-                
-                    else
-                    {
-                        sniperAnimator.SetBool("Aim", false);
-                        PlayerCanvasController.Instance.ControlSniperScope(false);
-                        ChangeFovOfCameraForSniper(false);
-                    }
-                }
-
-                else
-                {
-                    if (Input.GetButton("Fire2"))
-                    {
-                        ChangeFovOfCameraForOthers(true);
-                    }
-                
-                    else
-                    {
-                        ChangeFovOfCameraForOthers(false);
-                    }
-                }
-                
-                if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f)
-                {
-                    gunIndex++;
-                    if (gunIndex > guns.Length-1)
-                    {
-                        gunIndex = 0;
-                    }
-
-                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
-                }
-                else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f)
-                {
-                    gunIndex--;
-                    if (gunIndex <0)
-                    {
-                        gunIndex = guns.Length-1;
-                    }
-
-                    photonView.RPC("SetGun",RpcTarget.All,gunIndex);
-                }
-                ChangeGunWithNumberKeys();  
                 }
             }
 
@@ -203,6 +139,118 @@ namespace Player.Shoot
                 
             }
         }
+
+        private void ControlShooting()
+        {
+            if (Input.GetButtonDown("Fire1"))
+            {
+                if (!isAutoFireEnabled)
+                {
+                    if (isShootingDelayFinished)
+                    {
+                        Shoot();
+                        isShootingDelayFinished = false;
+                    }
+                }
+            }
+            
+            if (Input.GetButton("Fire1"))
+            {
+                if (isAutoFireEnabled)
+                {
+                    time += Time.deltaTime;
+                    if (time > shootingDelay)
+                    { 
+                        Shoot(); 
+                        time = 0;
+                    }
+                }
+            }
+                
+            if (Input.GetButtonUp("Fire1"))
+            {
+                if (!isShootingDelayFinished && !isCalculatingDelay)
+                {
+                    time = 0;
+                    activeGun.muzzleFlash.SetActive(false);
+                    isCalculatingDelay = true;
+                }
+            }
+
+        }
+
+        private void ControlShootingDelay()
+        {
+            time += Time.deltaTime;
+
+            if (time > shootingDelay)
+            {
+                isShootingDelayFinished = true;
+                time = 0;
+            }
+        }
+        private void ControlScoping()
+        {
+            if (gunIndex == 2)
+            {
+                if (Input.GetButton("Fire2"))
+                {
+                    sniperAnimator.SetBool("Aim", true);
+                }
+                
+                else
+                {
+                    sniperAnimator.SetBool("Aim", false);
+                    PlayerCanvasController.Instance.ControlSniperScope(false);
+                    ChangeFovOfCameraForSniper(false);
+                }
+            }
+
+            else
+            {
+                if (Input.GetButton("Fire2"))
+                {
+                    if (!isScoped)
+                    {
+                        ChangeFovOfCameraForOthers(true);
+                    }
+                }
+                
+                else
+                {
+                    if (isScoped)
+                    {
+                        ChangeFovOfCameraForOthers(false);
+                    }
+                }
+            }
+        }
+
+        private void ControlGunChanging()
+        {
+             
+            if (Input.GetAxisRaw("Mouse ScrollWheel") > 0f)
+            {
+                gunIndex++;
+                if (gunIndex > guns.Length-1)
+                {
+                    gunIndex = 0;
+                }
+
+                photonView.RPC("SetGun",RpcTarget.All,gunIndex);
+            }
+            else if (Input.GetAxisRaw("Mouse ScrollWheel") < 0f)
+            {
+                gunIndex--;
+                if (gunIndex <0)
+                {
+                    gunIndex = guns.Length-1;
+                }
+
+                photonView.RPC("SetGun",RpcTarget.All,gunIndex);
+            }
+            ChangeGunWithNumberKeys();  
+        }
         private Ray CalculateShootingDirection()
         {
             Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
@@ -224,6 +272,10 @@ namespace Player.Shoot
 
             activeGun = guns[index];
             shootingDelay = activeGun.shootingDelay;
+            time = shootingDelay;
+          
+            isCalculatingDelay = false;
+            isShootingDelayFinished = true;
             isAutoFireEnabled = activeGun.isAutoFireEnabled;
             
             SetDamageToDeal(activeGun);
@@ -374,7 +426,6 @@ namespace Player.Shoot
 
             }
         }
-
         #endregion
     }
   

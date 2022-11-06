@@ -19,7 +19,9 @@ namespace Multiplayer.Match
         [SerializeField] private List<PlayerInfo> allPlayerInfos = new List<PlayerInfo>();
         [SerializeField] private GameStates _currentState;
         
-        [SerializeField] private float matchTime = 0;
+        [SerializeField] private int _roundTime = 0;
+        [SerializeField] private int _averagePoint = 0;
+        
         [SerializeField] private float endingDelay;
         [SerializeField] private bool isPerpetual = false;
         public static event Action<GameStates> onGameStateChanged;
@@ -35,7 +37,12 @@ namespace Multiplayer.Match
 
         public static MatchController Instance => _Instance;
         public GameStates currentState => _currentState;
-        
+
+        public int averagePoint=> PlayerPrefs.GetInt("averagePoint", _averagePoint);
+
+
+        public int roundTime => PlayerPrefs.GetInt("roundTime", _roundTime*60);
+  
         #endregion
 
         #region Unity Methods
@@ -58,7 +65,7 @@ namespace Multiplayer.Match
         void Start()
         {
             PlayerCanvasController.Instance.ControlTimerActivity(false);
-            currentTime = matchTime;
+            currentTime = roundTime;
             
             if (!PhotonNetwork.IsConnected)
             {
@@ -126,7 +133,19 @@ namespace Multiplayer.Match
             package[2] = 0;
             package[3] = 0;
 
-
+          /*  if (allPlayerInfos.Count > 0)
+            {
+                print("newp " +(int)package[1] + "actor " +allPlayerInfos[0].actor + "allp " +allPlayerInfos.Count );
+            }
+            
+            
+            for (int i = 0; i < allPlayerInfos.Count; i++)
+            {
+                if (allPlayerInfos[i].actor == (int)package[1])
+                {
+                   return;
+                }
+            }*/
             PhotonNetwork.RaiseEvent(
                 (byte)EventCodes.NewPlayer,
                 package,
@@ -141,7 +160,6 @@ namespace Multiplayer.Match
             allPlayerInfos.Add(newPlayer);
             ListPlayerSend();
         }
-
         private void ListPlayerSend()
         {
             object[] package = new object[allPlayerInfos.Count+1];
@@ -306,7 +324,7 @@ namespace Multiplayer.Match
 
             foreach (PlayerInfo player in allPlayerInfos)
             {
-                if ((player.kills - player.deaths) >= 3)
+                if ((player.kills - player.deaths) >= averagePoint)
                 {
                     isWinnerFound = true;
                     break;
@@ -357,6 +375,9 @@ namespace Multiplayer.Match
             {
                 PhotonNetwork.AutomaticallySyncScene = false;
                 PhotonNetwork.LeaveRoom();
+                
+                PlayerPrefs.DeleteKey("roundTime");
+                PlayerPrefs.DeleteKey("averagePoint");
             }
             else
             {
@@ -400,9 +421,9 @@ namespace Multiplayer.Match
 
         private void SetupTimer()
         {
-            if (matchTime > 0)
+            if (roundTime > 0)
             {
-                currentTime = matchTime;
+                currentTime = roundTime;
                 ControlTime();
             }
         }
@@ -459,6 +480,7 @@ namespace Multiplayer.Match
                         
                         NewPlayerReceive(data);
                         break;
+
                     case EventCodes.ListPlayers:
                         
                         ListPlayerReceive(data);
@@ -486,7 +508,22 @@ namespace Multiplayer.Match
             base.OnLeftRoom();
             SceneManager.LoadScene(0);
         }
-
+        
+        public void OnPlayerLeft(string username)
+        {
+            if (allPlayerInfos.Count > 1)
+            {
+                for (int i = 1; i < allPlayerInfos.Count; i++)
+                {
+                    if (allPlayerInfos[i].name == username)
+                    {
+                        allPlayerInfos.Remove(allPlayerInfos[i]);
+                        break;
+                    }
+                }
+                ListPlayerSend();
+            }
+        }
         #endregion
 
     }
@@ -508,7 +545,7 @@ namespace Multiplayer.Match
 
     public enum EventCodes : byte
     {
-        NewPlayer,ListPlayers,UpdateStat,NextMatch,TimeSync
+        NewPlayer,PlayerLeft,ListPlayers,UpdateStat,NextMatch,TimeSync
     }
 
     public enum GameStates

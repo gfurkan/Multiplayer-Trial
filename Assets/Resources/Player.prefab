@@ -229,7 +229,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isAutoFireEnabled: 1
-  _shootingDelay: 0.2
+  _shootingDelay: 0.35
   _muzzleFlash: {fileID: 1230092102486140071}
   _damageValue: 10
   renderer: {fileID: 725878128581866230}
@@ -473,6 +473,7 @@ MonoBehaviour:
   sniperScopedFOV: 10
   normalGunScopedFOV: 45
   normalGunScopeSpeed: 0.5
+  isShootingDelayFinished: 0
 --- !u!114 &981343290040444981
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -630,7 +631,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isAutoFireEnabled: 0
-  _shootingDelay: 0.4
+  _shootingDelay: 2
   _muzzleFlash: {fileID: 1230092100947165306}
   _damageValue: 20
   renderer: {fileID: 725878128417131364}

@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
+using Multiplayer.Match;
 using Multiplayer.Room.Info;
 using UnityEngine;
 using Photon.Pun;
 using TMPro;
 using Photon.Realtime;
-using UnityEngine.UI;
-using Random = UnityEngine.Random;
 
 namespace Multiplayer.Launcher
 {
@@ -17,13 +17,13 @@ namespace Multiplayer.Launcher
 
         [SerializeField] private GameObject menuButtons,loadingPanel,createRoomPanel,roomPanel,errorPanel,browsePanel,nicknamePanel;
         [SerializeField] private TextMeshProUGUI loadingText, roomNameText, errorText;
-        [SerializeField] private TMP_InputField roomNameInput,nicknameInput;
+        [SerializeField] private TMP_InputField roomNameInput,nicknameInput,averagePointInputField,roundTimeInputField;
         [SerializeField] private TextMeshProUGUI playerNameText;
         [SerializeField] private RoomInfoController roomInfoController;
         [SerializeField] private int roomNameCharacterLimit = 0;
         [SerializeField] private byte maxPlayerCount = 0;
         [SerializeField] private string levelName;
-        [SerializeField] private GameObject startGameButton,testButton;
+        [SerializeField] private GameObject startGameButton,testButton,averagePointInput,roundTimeInput;
         
         private List<RoomInfoController> roomInfoList = new List<RoomInfoController>();
         private List<TextMeshProUGUI> playerNameList = new List<TextMeshProUGUI>();
@@ -172,10 +172,14 @@ namespace Multiplayer.Launcher
             if (PhotonNetwork.IsMasterClient)
             {
                 startGameButton.SetActive(true);
+                roundTimeInput.SetActive(true);
+                averagePointInput.SetActive(true);
             }
             else
             {
                 startGameButton.SetActive(false);
+                roundTimeInput.SetActive(false);
+                averagePointInput.SetActive(false);
             }
         }
 
@@ -286,15 +290,24 @@ namespace Multiplayer.Launcher
             if (PhotonNetwork.IsMasterClient)
             {
                 startGameButton.SetActive(true);
+                roundTimeInput.SetActive(true);
+                averagePointInput.SetActive(true);
             }
             else
             {
                 startGameButton.SetActive(false);
+                roundTimeInput.SetActive(false);
+                averagePointInput.SetActive(false);
             }
         }
 
         public void StartGame()
         {
+            if (!string.IsNullOrEmpty(roundTimeInputField.text) && !string.IsNullOrEmpty(averagePointInputField.text))
+            {
+                PlayerPrefs.SetInt("roundTime",int.Parse(roundTimeInputField.text)*60);
+                PlayerPrefs.SetInt("averagePoint",int.Parse(averagePointInputField.text));
+            }
             PhotonNetwork.LoadLevel(levelName);
         }
 
